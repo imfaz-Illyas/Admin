@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PULSE — The world's techno DJ marketplace</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231B1B1F'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='ui-sans-serif' font-weight='800' font-size='30' fill='%23FFB597'%3EP%3C/text%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{
+colors:{cream:{50:"#FDFBF6",100:"#F8F5EE",200:"#F0EBDF",300:"#E5DDC9"},ink:{100:"#E4E4E7",200:"#A1A1AA",300:"#71717A",400:"#52525B",700:"#1B1B1F"},peach:"#FFB597",lime:"#C7F26C",lavender:"#E6DEFF",rose:"#FFD2E0"},
+fontFamily:{display:['"Bricolage Grotesque"','ui-sans-serif','system-ui'],sans:['Inter','ui-sans-serif','system-ui'],mono:['"JetBrains Mono"','ui-monospace','SFMono-Regular','monospace']}
+}}}
+</script>
+<style>
+html,body{background:#F8F5EE;color:#1B1B1F}
+body{font-family:'Inter',ui-sans-serif,system-ui;-webkit-font-smoothing:antialiased}
+.display{font-family:'Bricolage Grotesque',ui-sans-serif,system-ui;letter-spacing:-.02em}
+.ua{position:relative;display:inline-block}.ua::after{content:"";position:absolute;left:-2%;right:-2%;bottom:.04em;height:.42em;background:#FFB597;border-radius:999px;z-index:-1}
+.btn-dark{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border-radius:999px;background:#1B1B1F;color:white;padding:.75rem 1.4rem;font-weight:600;font-size:.9rem;border:0;cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-dark:hover{transform:translateY(-1px);box-shadow:0 8px 24px -8px rgba(27,27,31,.45)}
+.btn-light{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border-radius:999px;background:white;color:#1B1B1F;padding:.75rem 1.4rem;font-weight:600;font-size:.9rem;border:1px solid rgba(27,27,31,.12);cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-light:hover{transform:translateY(-1px);box-shadow:0 8px 24px -8px rgba(27,27,31,.18)}
+.pill{display:inline-flex;align-items:center;gap:.5rem;border-radius:999px;background:white;border:1px solid rgba(27,27,31,.08);padding:.4rem .9rem;font-size:.78rem;font-weight:600;color:#1B1B1F}
+.pill .dot{width:.4rem;height:.4rem;border-radius:50%;background:#6B2EFF}
+.card{background:white;border:1px solid rgba(27,27,31,.06);border-radius:1.5rem;box-shadow:0 30px 60px -40px rgba(27,27,31,.18);transition:transform .25s,box-shadow .25s}
+.card-hover:hover{transform:translateY(-3px);box-shadow:0 40px 70px -30px rgba(27,27,31,.28)}
+.input{width:100%;border-radius:.9rem;border:1px solid rgba(27,27,31,.14);background:white;padding:.85rem 1rem;color:#1B1B1F;font-size:.95rem}
+.input:focus{outline:none;border-color:#1B1B1F;box-shadow:0 0 0 4px rgba(27,27,31,.08)}
+.checkb{display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-radius:9999px;background:#1B1B1F;color:#FFB597;flex-shrink:0}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}.mq{animation:mq 40s linear infinite}
+.mq-mask{-webkit-mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent);mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent)}
+@keyframes fl{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-10px) rotate(var(--r,0deg))}}
+.fl{animation:fl 6s ease-in-out infinite}.fl-2{animation:fl 7s ease-in-out infinite -1.5s}.fl-3{animation:fl 5s ease-in-out infinite -2.5s}
+@keyframes sp{to{transform:rotate(360deg)}}.sp-slow{animation:sp 22s linear infinite}.vinyl{animation:sp 6s linear infinite}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}.reveal.visible{opacity:1;transform:none}
+.pf{animation:pf .35s cubic-bezier(.22,1,.36,1) both}@keyframes pf{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.blob{position:absolute;pointer-events:none;border-radius:9999px;filter:blur(28px);opacity:.6}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(27,27,31,.65);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:2rem 1rem}
+.modal.open{display:flex}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body class="relative min-h-screen overflow-x-hidden">
+
+<header id="nav" class="fixed inset-x-0 top-0 z-50 transition-all">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
+<div id="navInner" class="flex items-center justify-between rounded-full px-4 py-2 transition-all">
+<a href="#home" data-route="home" class="flex items-center gap-2 pl-2">
+<span class="flex h-9 w-9 items-center justify-center rounded-2xl bg-ink-700 text-peach font-display font-extrabold">P</span>
+<span class="display text-lg font-extrabold tracking-tight">pulse<span style="color:#6B2EFF">.</span></span>
+</a>
+<nav class="hidden md:flex items-center gap-1">
+<a href="#home" data-route="home" class="nav-link px-4 py-2 text-sm font-medium text-ink-400 hover:text-ink-700">Home</a>
+<a href="#artists" data-route="artists" class="nav-link px-4 py-2 text-sm font-medium text-ink-400 hover:text-ink-700">Artists</a>
+<a href="#how" class="px-4 py-2 text-sm font-medium text-ink-400 hover:text-ink-700">How it works</a>
+<a href="#pricing" class="px-4 py-2 text-sm font-medium text-ink-400 hover:text-ink-700">Pricing</a>
+<a href="#contact" class="px-4 py-2 text-sm font-medium text-ink-400 hover:text-ink-700">Contact</a>
+</nav>
+<div class="flex items-center gap-2">
+<a href="#login" data-route="login" class="hidden sm:inline-flex btn-light">Log in</a>
+<a href="#join" data-route="join" class="btn-dark">List your profile</a>
+<button id="menuBtn" class="md:hidden rounded-full border border-ink-100 bg-white p-2 text-ink-700"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+</div>
+</div>
+</div>
+<div id="mobileMenu" class="md:hidden mx-4 overflow-hidden bg-white rounded-2xl border border-ink-100 max-h-0 transition-all">
+<div class="px-2 py-2 flex flex-col">
+<a href="#home" data-route="home" class="rounded-xl px-3 py-2 text-base text-ink-700 hover:bg-cream-100">Home</a>
+<a href="#artists" data-route="artists" class="rounded-xl px-3 py-2 text-base text-ink-700 hover:bg-cream-100">Artists</a>
+<a href="#how" class="rounded-xl px-3 py-2 text-base text-ink-700 hover:bg-cream-100">How it works</a>
+<a href="#pricing" class="rounded-xl px-3 py-2 text-base text-ink-700 hover:bg-cream-100">Pricing</a>
+<a href="#login" data-route="login" class="rounded-xl px-3 py-2 text-base text-ink-700 hover:bg-cream-100">Log in</a>
+<a href="#join" data-route="join" class="rounded-xl px-3 py-2 text-base text-ink-700 hover:bg-cream-100">List your profile</a>
+</div>
+</div>
+</header>
+
+<main id="app" class="pt-24"></main>
+
+<footer class="relative mt-32 bg-ink-700 text-cream-100">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 grid gap-10 md:grid-cols-4">
+<div class="md:col-span-2">
+<div class="flex items-center gap-2"><span class="flex h-9 w-9 items-center justify-center rounded-2xl bg-peach text-ink-700 font-display font-extrabold">P</span><span class="display text-lg font-extrabold tracking-tight">pulse<span class="text-peach">.</span></span></div>
+<p class="mt-4 max-w-md text-sm text-ink-100/80">The world's techno DJ marketplace. Discover, collaborate, and book underground talent.</p>
+</div>
+<div>
+<h4 class="text-xs uppercase tracking-[.2em] text-ink-200">Explore</h4>
+<ul class="mt-4 space-y-2 text-sm">
+<li><a class="hover:text-white text-ink-100/80" href="#artists" data-route="artists">All artists</a></li>
+<li><a class="hover:text-white text-ink-100/80" href="#artists" data-route="artists" data-genre="Industrial">Industrial</a></li>
+<li><a class="hover:text-white text-ink-100/80" href="#artists" data-route="artists" data-genre="Hard Techno">Hard Techno</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-xs uppercase tracking-[.2em] text-ink-200">Account</h4>
+<ul class="mt-4 space-y-2 text-sm">
+<li><a class="hover:text-white text-ink-100/80" href="#login" data-route="login">Log in</a></li>
+<li><a class="hover:text-white text-ink-100/80" href="#join" data-route="join">List your profile</a></li>
+</ul>
+</div>
+</div>
+<div class="border-t border-white/10">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col items-start justify-between gap-2 py-6 text-xs text-ink-200 md:flex-row md:items-center">
+<p>© 2026 PULSE. All rights reserved.</p>
+<div class="flex items-center gap-4"><p>Built for the dancefloor.</p><a href="pulse-admin.html" class="inline-flex items-center gap-1 rounded-full border border-white/15 px-3 py-1 text-[11px] uppercase tracking-widest text-ink-100/70 hover:border-peach/60 hover:text-peach">Admin</a></div>
+</div>
+</div>
+</footer>
+
+<div id="modal" class="modal" role="dialog" aria-modal="true">
+<div id="modalContent" class="relative w-full max-w-5xl rounded-3xl bg-white border border-ink-100 my-4 overflow-hidden"></div>
+</div>
+
+<script>
+const u=(id,w=900)=>`https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
+const esc=(s)=>String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const SEED=[
+{slug:"kaer-vex",name:"Kaer Vex",genres:["Industrial","Hard Techno"],city:"Berlin",country:"Germany",bio:"Forged in Friedrichshain basements, Kaer Vex carves industrial sets with relentless 145-BPM kicks.",profileImage:u("1493225457124-a3eb161ffa5f"),coverImage:u("1492684223066-81342ee5ff30",1600),musicEmbed:"https://soundcloud.com/forss/flickermood",social:{instagram:"#",soundcloud:"#",spotify:"#"},popularity:92,verified:true,rate:"€2,400 — €4,500"},
+{slug:"lunaire",name:"Lunaïre",genres:["Melodic Techno","Hypnotic"],city:"Paris",country:"France",bio:"Hypnotic arpeggios and lunar pads — long-form sets that feel like cinema.",profileImage:u("1518770660439-4636190af475"),coverImage:u("1470229722913-7c0e2dbbafd3",1600),musicEmbed:"https://soundcloud.com/forss/journeyman",social:{instagram:"#",soundcloud:"#",spotify:"#"},popularity:88,verified:true,rate:"€1,800 — €3,000"},
+{slug:"ostari",name:"Ostari",genres:["Acid","Peak Time"],city:"Detroit",country:"United States",bio:"Detroit-born and TR-303 obsessed.",profileImage:u("1531123897727-8f129e1688ce"),coverImage:u("1453738773917-9c3eff1db985",1600),musicEmbed:"https://soundcloud.com/forss/soulhack",social:{instagram:"#",soundcloud:"#"},popularity:81,rate:"$1,500 — $2,800"},
+{slug:"drelle",name:"Drelle",genres:["Dub Techno","Minimal"],city:"Reykjavík",country:"Iceland",bio:"Slow-moving dub chords and arctic reverb tails.",profileImage:u("1500530855697-b586d89ba3ee"),coverImage:u("1418065460487-3e41a6c84dc5",1600),musicEmbed:"https://soundcloud.com/forss/flickermood",social:{soundcloud:"#"},popularity:64,rate:"€800 — €1,200"},
+{slug:"vexorra",name:"Vexorra",genres:["Hard Techno","Industrial"],city:"Rotterdam",country:"Netherlands",bio:"Pure 150-BPM aggression, leaner and more strategic than gabber.",profileImage:u("1488376739305-a0d70de26e0c"),coverImage:u("1493225457124-a3eb161ffa5f",1600),musicEmbed:"https://soundcloud.com/forss/journeyman",social:{instagram:"#",soundcloud:"#"},popularity:90,verified:true,rate:"€2,200 — €3,800"},
+{slug:"noor-azimi",name:"Noor Azimi",genres:["Hypnotic","Melodic Techno"],city:"Tbilisi",country:"Georgia",bio:"Resident at Khidi, builds 8-hour sunrise sets.",profileImage:u("1504593811423-6dd665756598"),coverImage:u("1470225620780-dba8ba36b745",1600),musicEmbed:"https://soundcloud.com/forss/soulhack",social:{instagram:"#",soundcloud:"#"},popularity:72,rate:"€1,200 — €2,000"},
+{slug:"phantasmal",name:"Phantasmal",genres:["Industrial","Acid"],city:"Mexico City",country:"Mexico",bio:"Mask-on, identity-off — half DJ, half theatre.",profileImage:u("1506794778202-cad84cf45f1d"),coverImage:u("1485579149621-3123dd979885",1600),musicEmbed:"https://soundcloud.com/forss/flickermood",social:{instagram:"#"},popularity:60,rate:"$700 — $1,200"},
+{slug:"saari",name:"Saari",genres:["Minimal","Dub Techno"],city:"Helsinki",country:"Finland",bio:"Architect by day, DJ by night.",profileImage:u("1517841905240-472988babdf9"),coverImage:u("1418065460487-3e41a6c84dc5",1600),musicEmbed:"https://soundcloud.com/forss/journeyman",social:{soundcloud:"#"},popularity:55,rate:"€600 — €900"},
+{slug:"rytm-gang",name:"Rytm Gang",genres:["Peak Time","Melodic Techno"],city:"London",country:"United Kingdom",bio:"Two-man crew obsessed with peak-time payoffs.",profileImage:u("1502980426475-b83966705988"),coverImage:u("1453738773917-9c3eff1db985",1600),musicEmbed:"https://soundcloud.com/forss/soulhack",social:{instagram:"#",soundcloud:"#",spotify:"#"},popularity:84,verified:true,rate:"£1,800 — £3,200"},
+{slug:"tessera",name:"Tessera",genres:["Melodic Techno","Peak Time"],city:"Barcelona",country:"Spain",bio:"Mediterranean melodic techno with sun-warped chords.",profileImage:u("1487412720507-e7ab37603c6f"),coverImage:u("1470229722913-7c0e2dbbafd3",1600),musicEmbed:"https://soundcloud.com/forss/flickermood",social:{instagram:"#",soundcloud:"#"},popularity:78,rate:"€1,400 — €2,600"},
+{slug:"kraal",name:"KRAAL",genres:["Hard Techno","Acid"],city:"Warsaw",country:"Poland",bio:"Smoke-machine maximalist with squelching 303 lines.",profileImage:u("1519345182560-3f2917c472ef"),coverImage:u("1492684223066-81342ee5ff30",1600),musicEmbed:"https://soundcloud.com/forss/journeyman",social:{instagram:"#",soundcloud:"#"},popularity:70,rate:"€900 — €1,600"},
+{slug:"yume",name:"YUME",genres:["Hypnotic","Dub Techno"],city:"Tokyo",country:"Japan",bio:"Tokyo-based selector with granular textures.",profileImage:u("1524504388940-b1c1722653e1"),coverImage:u("1470225620780-dba8ba36b745",1600),musicEmbed:"https://soundcloud.com/forss/soulhack",social:{instagram:"#"},popularity:66,rate:"¥220k — ¥420k"}
+];
+
+const ADMIN_KEY='pulse:admin:artists';
+const adapt=a=>{const s=SEED.find(x=>x.slug===a.slug)||{};const m={...s,...a};if(!m.coverImage)m.coverImage=m.profileImage||'';if(m.gallery==null)m.gallery=[];if(m.events==null)m.events=[];if(m.social==null)m.social={};return m};
+function loadArtists(){try{const v=JSON.parse(localStorage.getItem(ADMIN_KEY));if(Array.isArray(v)&&v.length){const f=v.filter(a=>a&&a.slug&&a.status!=='draft'&&a.status!=='pending').map(adapt);if(f.length)return f}}catch{}return SEED}
+let ARTISTS=loadArtists();
+addEventListener('storage',e=>{if(e.key===ADMIN_KEY){ARTISTS=loadArtists();render()}});
+if(typeof BroadcastChannel!=='undefined'){new BroadcastChannel('pulse:data').addEventListener('message',m=>{if(m.data&&m.data.type==='artists'){ARTISTS=loadArtists();render()}});}
+
+const KS="pulse:saved",KR="pulse:recent";
+const gs=()=>{try{return JSON.parse(localStorage.getItem(KS)||"[]")}catch{return[]}};
+const isSaved=s=>gs().includes(s);
+const toggleSaved=s=>{const a=gs();const i=a.indexOf(s);if(i>=0)a.splice(i,1);else a.unshift(s);localStorage.setItem(KS,JSON.stringify(a));return a.includes(s)};
+const pr=s=>{let a=[];try{a=JSON.parse(localStorage.getItem(KR)||"[]")}catch{}a=a.filter(x=>x!==s);a.unshift(s);localStorage.setItem(KR,JSON.stringify(a.slice(0,12)))};
+
+const app=document.getElementById('app');
+const go=(r,q={})=>{const sp=new URLSearchParams(q).toString();location.hash=`#${r}${sp?'?'+sp:''}`};
+const parseHash=()=>{const raw=location.hash.replace(/^#/,'')||'home';const[r,qs='']=raw.split('?');return{r,q:Object.fromEntries(new URLSearchParams(qs).entries())}};
+function setActive(r){document.querySelectorAll('.nav-link').forEach(a=>{const h=(a.getAttribute('href')||'').replace(/^#/,'').split('?')[0];if(['home','artists'].includes(h)){a.classList.toggle('text-ink-700',h===r);a.classList.toggle('text-ink-400',h!==r)}})}
+
+function render(){
+try{
+let{r,q}=parseHash();
+if(r==='dashboard')r='home';
+setActive(r);closeMM();
+const map={home:rHome,artists:rList,profile:rProfile,login:()=>rAuth('login'),signup:()=>rAuth('signup'),join:rJoin};
+const fn=map[r]||rHome;
+app.innerHTML=fn(q);
+const after={artists:aList,profile:aProfile,login:aAuth,signup:aAuth,home:aHome,join:aJoin}[r];
+if(after)after(q);
+const m=document.querySelector('main');m.classList.remove('pf');void m.offsetWidth;m.classList.add('pf');
+const anc=!map[r]&&document.getElementById(r);
+if(anc)requestAnimationFrame(()=>anc.scrollIntoView({behavior:'smooth',block:'start'}));
+else window.scrollTo({top:0,behavior:'instant'});
+initReveal();
+}catch(err){
+console.error(err);
+app.innerHTML=`<section class="mx-auto max-w-2xl px-4 py-20 text-center"><p class="pill mx-auto" style="background:#fee;color:#900">Render error</p><h1 class="display mt-4 text-3xl font-extrabold">${esc(err&&err.message||'Error')}</h1><a href="#home" data-route="home" class="btn-dark mt-6">Go home</a></section>`;
+}
+}
+addEventListener('hashchange',render);
+document.addEventListener('click',e=>{const a=e.target.closest('a[data-route]');if(!a)return;e.preventDefault();const q={};const sl=a.getAttribute('data-slug');const ge=a.getAttribute('data-genre');if(sl)q.slug=sl;if(ge)q.genre=ge;go(a.getAttribute('data-route'),q)});
+
+/* HOME */
+function rHome(){return hero()+lovedBy()+how()+forArtists()+forVenues()+pricing()+contact()}
+function getFeatured(){const list=(ARTISTS&&ARTISTS.length?ARTISTS:SEED);const f=list.filter(a=>a.featured);return f.length>=3?f:[...list].sort((a,b)=>(b.popularity||0)-(a.popularity||0))}
+function hcHtml(a,slot){const pos=['right-2 top-6 w-[260px]','left-2 top-32 w-[240px]','right-12 bottom-0 w-[230px]'][slot];const fly=['fl','fl-2','fl-3'][slot];const rot=[4,-6,3][slot];return `<a id="hc${slot}" href="#profile" data-route="profile" data-slug="${a.slug}" class="absolute ${pos} ${fly} card card-hover overflow-hidden block" style="transform:rotate(${rot}deg)"><div class="aspect-[4/5] relative"><img src="${a.profileImage}" class="absolute inset-0 h-full w-full object-cover transition-opacity duration-500" alt="${esc(a.name)}"/><div class="absolute inset-0 bg-gradient-to-t from-ink-700/70 to-transparent"></div><div class="absolute inset-x-0 bottom-0 p-3 text-white"><p class="display text-base font-bold leading-tight">${esc(a.name)}</p><p class="text-[11px] opacity-85">${a.genres[0]} · ${esc(a.city)}</p></div></div></a>`}
+let _heroT=null;
+function aHome(){
+const f=document.getElementById('hcf');if(f)f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f);const s=document.getElementById('hcs');s.classList.remove('hidden');s.innerHTML=`<p class="font-semibold">Got it!</p><p>Thanks ${esc(fd.get('name')||'there')}.</p>`;f.reset()});
+const pool=getFeatured();
+if(_heroT){clearInterval(_heroT);_heroT=null}
+if(pool.length>3){let hi=0;_heroT=setInterval(()=>{hi=(hi+3)%pool.length;[0,1,2].forEach(s=>{const a=pool[(hi+s)%pool.length];const el=document.getElementById('hc'+s);if(el)el.outerHTML=hcHtml(a,s)})},5000)}
+}
+
+function hero(){
+const pool=getFeatured();
+const top=[pool[0],pool[1%pool.length],pool[2%pool.length]];
+return `<section id="home" class="relative">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6 pb-20 grid lg:grid-cols-2 gap-10 items-center relative">
+<div class="blob bg-peach top-10 -left-10 w-72 h-72"></div>
+<div class="blob bg-lavender top-40 right-0 w-80 h-80"></div>
+<div class="relative z-10">
+<span class="pill"><span class="dot"></span> Open beta · join free</span>
+<h1 class="display mt-5 text-5xl sm:text-6xl md:text-7xl font-extrabold leading-[1.02] tracking-tight">The world's<br/><span class="ua">techno DJ</span><br/>marketplace.</h1>
+<p class="mt-6 max-w-xl text-lg text-ink-400">Discover sets, agree on rates, and book your night without email back-and-forth.</p>
+<div class="mt-8 flex flex-wrap gap-3">
+<a href="#join" data-route="join" class="btn-dark">List your profile</a>
+<a href="#artists" data-route="artists" class="btn-light">Browse artists →</a>
+</div>
+<div class="mt-10 flex items-center gap-4">
+<div class="flex -space-x-2">${ARTISTS.slice(0,5).map(a=>`<img src="${a.profileImage}" class="h-10 w-10 rounded-full border-2 border-cream-100 object-cover" alt="" loading="lazy"/>`).join('')}</div>
+<p class="text-sm text-ink-400"><span class="font-semibold text-ink-700">2,300+ artists</span> already on PULSE</p>
+</div>
+</div>
+<div class="relative h-[520px] sm:h-[560px] mt-8 lg:mt-0">
+<svg class="sp-slow absolute inset-0 m-auto h-[460px] w-[460px] opacity-50" viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="98" stroke="#1B1B1F" stroke-dasharray="2 6" stroke-width="0.4"/><circle cx="100" cy="100" r="80" stroke="#1B1B1F" stroke-dasharray="1 8" stroke-width="0.3"/></svg>
+<div class="absolute -top-2 right-2 h-28 w-28 rounded-full border-8 border-ink-700 bg-ink-700 vinyl flex items-center justify-center fl"><div class="h-8 w-8 rounded-full bg-peach"></div></div>
+<div class="absolute bottom-4 -left-2 fl-3 px-3 py-1.5 rounded-full bg-lime text-ink-700 font-semibold text-sm shadow" style="--r:-6deg">live now</div>
+${top.map((a,i)=>hcHtml(a,i)).join('')}
+</div>
+</div>
+</section>`}
+
+function lovedBy(){let cs=[];try{const v=JSON.parse(localStorage.getItem('pulse:admin:clients'));if(Array.isArray(v)&&v.length)cs=v.filter(c=>c&&c.name&&c.status!=='draft')}catch{}if(!cs.length)cs=['Tresor','Bassiani','Berghain','Khidi','fabric','Awakenings','Sónar','Printworks','Dekmantel','Concrete','HÖR','Boiler Room'].map(n=>({name:n}));const loop=[...cs,...cs];return `<section class="border-y border-ink-100 bg-cream-50 py-10">
+<p class="text-center text-xs uppercase tracking-[.25em] text-ink-300">Loved by venues, promoters, and labels worldwide</p>
+<div class="mt-6 mq-mask overflow-hidden"><div class="flex gap-10 mq items-center" style="width:max-content">${loop.map(c=>c.logo?`<img src="${c.logo}" alt="${esc(c.name)}" class="h-10 sm:h-12 w-auto max-w-[140px] object-contain opacity-60 hover:opacity-100 transition-opacity"/>`:`<span class="display text-2xl sm:text-3xl font-extrabold tracking-tight text-ink-300 hover:text-ink-700 transition-colors">${esc(c.name)}</span>`).join('')}</div></div>
+</section>`}
+
+function how(){const steps=[{n:'01',t:'Discover',i:'🔎',b:'Browse 2,300+ artists across Industrial, Melodic, Hard Techno, Acid and more.',c:'bg-peach',a:'bg-rose'},{n:'02',t:'Connect',i:'💬',b:'Chat with artists or their agents in-app.',c:'bg-lime',a:'bg-cream-200'},{n:'03',t:'Book',i:'🎧',b:'Lock in dates and rates with one click.',c:'bg-lavender',a:'bg-peach'}];return `<section id="how" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24">
+<div class="max-w-3xl"><p class="pill"><span class="dot"></span> How does it work?</p><h2 class="display mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">Three steps. <span class="ua">Zero</span> agency overhead.</h2></div>
+<div class="mt-14 grid md:grid-cols-3 gap-6">${steps.map((s,i)=>`<div class="reveal card p-7 relative overflow-hidden card-hover" style="transition-delay:${i*60}ms"><div class="absolute right-0 top-0 ${s.a} w-32 h-32 -mr-12 -mt-12 rounded-full opacity-50"></div><div class="relative"><div class="display text-xs font-bold tracking-widest text-ink-300">STEP ${s.n}</div><div class="mt-4 inline-grid h-14 w-14 place-items-center rounded-2xl ${s.c} text-3xl">${s.i}</div><h3 class="display mt-5 text-2xl font-extrabold">${s.t}</h3><p class="mt-3 text-ink-400 leading-relaxed">${s.b}</p></div></div>`).join('')}</div>
+</section>`}
+
+function forArtists(){const f=['Build a profile in 5 minutes','Set your own rates','Let venues find you','Manage gigs and payouts','Auto-import sets from SoundCloud'];return `<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
+<div class="grid lg:grid-cols-2 gap-12 items-center">
+<div class="reveal">
+<p class="pill"><span class="dot" style="background:#FFB597"></span> For artists</p>
+<h2 class="display mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">Spend less time emailing.<br/>More time <span class="ua">in the booth</span>.</h2>
+<ul class="mt-8 space-y-4">${f.map(x=>`<li class="flex items-center gap-3"><span class="checkb"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="text-ink-700">${x}</span></li>`).join('')}</ul>
+<div class="mt-8 flex flex-wrap gap-3"><a href="#join" data-route="join" class="btn-dark">Claim your profile</a><a href="#artists" data-route="artists" class="btn-light">See the directory →</a></div>
+</div>
+<div class="reveal card p-8 bg-cream-50">
+<div class="grid grid-cols-2 gap-3">
+<div class="card p-4"><p class="text-[10px] uppercase tracking-widest text-ink-300">Profile views</p><p class="display mt-1 text-3xl font-extrabold">12,438</p><p class="text-xs mt-1" style="color:#3a8b00">↑ 18% vs last month</p></div>
+<div class="card p-4"><p class="text-[10px] uppercase tracking-widest text-ink-300">Clicks</p><p class="display mt-1 text-3xl font-extrabold">842</p><p class="text-xs mt-1" style="color:#3a8b00">↑ 12% vs last month</p></div>
+</div>
+<div class="card p-4 mt-3 flex items-start gap-3 bg-white">
+<span class="grid h-10 w-10 place-items-center rounded-2xl bg-peach text-ink-700 flex-shrink-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 6 12 13 2 6"/></svg></span>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-2 flex-wrap"><p class="display text-sm font-bold">Monthly performance report</p><span class="pill" style="font-size:.62rem;padding:.1rem .45rem;background:#C7F26C;border-color:#C7F26C">Auto</span></div>
+<p class="text-xs text-ink-400 mt-0.5">A detailed breakdown — views, clicks, top referrers, and enquiry conversion — delivered to your email on the 1st of every month.</p>
+<p class="text-[11px] text-ink-300 mt-1">Last sent: 1 May 2026 · noor@artist.com</p>
+</div>
+</div>
+</div>
+</div>
+</section>`}
+
+function forVenues(){const f=['Search 2,300+ artists','Real rates upfront','Send a brief, get proposals','Chat & contract inside PULSE','One-click escrow payments'];return `<section class="bg-cream-50 border-y border-ink-100 py-20">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
+<div class="reveal card p-8">
+<div class="flex items-center gap-2 rounded-2xl border border-ink-100 bg-white px-4 py-3"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="text-sm text-ink-400">"hard techno · Berlin"</span><span class="ml-auto pill">23 results</span></div>
+<div class="mt-3 grid grid-cols-3 gap-3">${ARTISTS.slice(0,3).map(x=>`<div class="card overflow-hidden"><div class="aspect-[4/5] relative"><img src="${x.profileImage}" class="absolute inset-0 h-full w-full object-cover" alt=""/></div><div class="p-2"><p class="display text-sm font-bold leading-tight">${esc(x.name)}</p><p class="text-[11px] mt-1 font-semibold">${esc(x.rate)}</p></div></div>`).join('')}</div>
+</div>
+<div class="reveal">
+<p class="pill"><span class="dot" style="background:#C7F26C"></span> For venues & promoters</p>
+<h2 class="display mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">Build a lineup<br/>in <span class="ua">an afternoon</span>.</h2>
+<ul class="mt-8 space-y-4">${f.map(x=>`<li class="flex items-center gap-3"><span class="checkb"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="text-ink-700">${x}</span></li>`).join('')}</ul>
+<div class="mt-8 flex flex-wrap gap-3"><a href="#login" data-route="login" class="btn-dark">Start booking</a><a href="#artists" data-route="artists" class="btn-light">Browse talent →</a></div>
+</div>
+</div>
+</section>`}
+
+function pricing(){
+const subs=loadSubs();
+return `<section id="pricing" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24">
+<div class="text-center max-w-3xl mx-auto"><p class="pill mx-auto"><span class="dot"></span> Pricing</p><h2 class="display mt-5 text-4xl sm:text-6xl font-extrabold tracking-tight">Simple, transparent <span class="ua">pricing</span>.</h2><p class="mt-6 text-lg text-ink-400">Annual subscription for artists. Pay-per-inquiry for venues — no commitment.</p></div>
+<div class="mt-12 grid md:grid-cols-${Math.min(Math.max(subs.length,1),3)} gap-6 max-w-3xl mx-auto">${subs.map(s=>tierCard(s)).join('')}</div>
+</section>`}
+function tierCard(s){
+const per=s.period==='inquiry'?'/ inquiry':s.period==='year'?'/ year':'/ month';
+const orig=s.originalPrice?`<span class="display text-2xl font-extrabold text-ink-300 line-through mr-2">${cur(s.currency)}${s.originalPrice}</span>`:'';
+const feat=s.isDefault;
+const isInq=s.period==='inquiry';
+const cta=isInq?'Browse artists':'Get started';
+const link=isInq?'#artists':'#join';
+const route=isInq?'artists':'join';
+return `<div class="card p-7 relative overflow-hidden flex flex-col h-full ${feat?'ring-2 ring-ink-700':''}">${feat&&!s.originalPrice?'<span class="absolute right-4 top-4 pill" style="background:#1B1B1F;color:white">Most popular</span>':''}${s.originalPrice?'<span class="absolute right-4 top-4 pill" style="background:#C7F26C">Save '+Math.round((1-s.price/s.originalPrice)*100)+'%</span>':''}<span class="grid h-12 w-12 place-items-center rounded-2xl ${feat?'bg-peach':'bg-lime'} text-2xl">★</span><h3 class="display mt-4 text-xl font-extrabold">${esc(s.name)}</h3><div class="mt-2 flex items-baseline flex-wrap">${orig}<span class="display text-4xl font-extrabold">${cur(s.currency)}${s.price}</span><span class="text-sm font-medium text-ink-400 ml-1">${per}</span></div>${s.freeQuota?`<p class="text-xs mt-1" style="color:#3a8b00">First ${s.freeQuota} ${isInq?'inquir'+(s.freeQuota>1?'ies':'y'):''} free ✓</p>`:''}<ul class="mt-5 space-y-2 text-sm flex-1">${(s.features||[]).map(f=>`<li class="flex items-center gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.5" class="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>${esc(f)}</li>`).join('')}</ul><a href="${link}" data-route="${route}" class="btn-${feat?'dark':'light'} mt-6 w-full">${cta}</a></div>`}
+
+function contact(){return `<section id="contact" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
+<div class="card p-8 sm:p-12 grid lg:grid-cols-2 gap-10 items-center bg-gradient-to-br from-white to-cream-50 relative overflow-hidden">
+<div class="absolute -top-10 -right-10 w-64 h-64 bg-peach rounded-full opacity-30 blur-3xl"></div>
+<div class="relative">
+<p class="pill"><span class="dot"></span> Contact us</p>
+<h2 class="display mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">Got a <span class="ua">question</span>?</h2>
+<p class="mt-5 text-ink-400">Whether you're an artist, agent, venue or curious raver — drop us a line.</p>
+</div>
+<form id="hcf" class="relative space-y-4">
+<div class="grid sm:grid-cols-2 gap-4"><div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Name</label><input class="input mt-1" name="name" required placeholder="Your name"/></div><div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Email</label><input class="input mt-1" type="email" name="email" required placeholder="you@email.com"/></div></div>
+<div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Message</label><textarea class="input mt-1" rows="5" name="message" required placeholder="Tell us a bit…"></textarea></div>
+<button type="submit" class="btn-dark w-full sm:w-auto">Send message →</button>
+<div id="hcs" class="hidden rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800"></div>
+</form>
+</div>
+</section>`}
+
+/* LIST */
+function rList(q){const ag=[...new Set(ARTISTS.flatMap(a=>a.genres))].sort();const ac=[...new Set(ARTISTS.map(a=>a.country))].sort();return `<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 pb-10">
+<p class="pill"><span class="dot"></span> Directory</p>
+<h1 class="display mt-5 text-4xl sm:text-6xl font-extrabold tracking-tight">All <span class="ua">artists</span></h1>
+<p id="rm" class="mt-3 text-ink-400"></p>
+</section>
+<div class="sticky top-24 z-30"><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="card p-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+<form id="fs" class="relative flex-1"><svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="fq" class="input pl-10" placeholder="Search by name, city…" value="${esc(q.q||'')}"/></form>
+<select id="gen" class="input max-w-[200px]"><option value="">All genres</option>${ag.map(g=>`<option ${q.genre===g?'selected':''}>${g}</option>`).join('')}</select>
+<select id="cou" class="input max-w-[200px]"><option value="">All countries</option>${ac.map(c=>`<option ${q.country===c?'selected':''}>${c}</option>`).join('')}</select>
+</div>
+</div></div>
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6"><div id="rg" class="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4"></div></div>`}
+
+function listCard(a,i=0){const v=a.visible||{};const sN=v.name!==false,sI=v.image!==false,sC=v.country!==false,sR=v.rate!==false;return `<a href="#profile" data-route="profile" data-slug="${a.slug}" class="reveal card card-hover overflow-hidden block group" style="transition-delay:${i*40}ms">
+<div class="relative aspect-[4/5]">${sI?`<img src="${a.profileImage}" alt="${esc(a.name)}" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="${i<4?'eager':'lazy'}"/>`:`<div class="absolute inset-0 bg-gradient-to-br from-cream-200 to-cream-300 grid place-items-center text-5xl font-bold text-ink-300">${(a.name||'?').slice(0,1)}</div>`}${a.verified?`<span class="absolute top-3 left-3 pill text-[10px]" style="padding:.15rem .5rem">★ Verified</span>`:''}<span class="absolute top-3 right-3 pill text-[10px]" style="padding:.15rem .5rem">★ ${a.popularity}</span></div>
+<div class="p-4"><div class="flex items-start justify-between gap-2"><div><p class="display text-base font-bold leading-tight">${sN?esc(a.name):'Anonymous'}</p><p class="text-xs text-ink-400 mt-0.5">${esc(a.city||'')}${sC&&a.country?', '+esc(a.country):''}</p></div>${sR?`<span class="text-[11px] font-semibold text-ink-700 whitespace-nowrap">${esc(a.rate||'')}</span>`:''}</div>
+<div class="mt-3 flex flex-wrap gap-1.5">${(a.genres||[]).slice(0,2).map(g=>`<span class="rounded-full text-[10px] uppercase tracking-wider px-2 py-0.5 bg-cream-100 text-ink-700 font-semibold">${g}</span>`).join('')}</div>
+</div></a>`}
+
+function aList(q){
+const renderR=q=>{
+let arr=ARTISTS.filter(a=>{if(q.genre&&!a.genres.includes(q.genre))return false;if(q.country&&a.country!==q.country)return false;if(q.q){const h=`${a.name} ${a.city} ${a.country} ${a.genres.join(' ')}`.toLowerCase();if(!h.includes(q.q.toLowerCase()))return false}return true});
+arr.sort((a,b)=>b.popularity-a.popularity);
+const grid=document.getElementById('rg');if(!grid)return;
+grid.outerHTML=arr.length===0?`<div id="rg" class="card p-12 text-center"><h3 class="display text-2xl font-extrabold">No artists match.</h3></div>`:`<div id="rg" class="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">${arr.map((a,i)=>listCard(a,i)).join('')}</div>`;
+const meta=document.getElementById('rm');if(meta){const bits=[`${arr.length} artist${arr.length===1?'':'s'}`];if(q.genre)bits.push(q.genre);if(q.country)bits.push(q.country);if(q.q)bits.push(`"${q.q}"`);meta.textContent=bits.join(' · ')}
+initReveal();
+};
+renderR(q);
+const fs=document.getElementById('fs');if(fs)fs.addEventListener('submit',e=>{e.preventDefault();const v=document.getElementById('fq').value.trim();const n={...q};if(v)n.q=v;else delete n.q;go('artists',n)});
+const g=document.getElementById('gen');if(g)g.addEventListener('change',e=>{const n={...q};if(e.target.value)n.genre=e.target.value;else delete n.genre;go('artists',n)});
+const c=document.getElementById('cou');if(c)c.addEventListener('change',e=>{const n={...q};if(e.target.value)n.country=e.target.value;else delete n.country;go('artists',n)});
+}
+
+/* PROFILE */
+function rProfile(q){
+const a=ARTISTS.find(x=>x.slug===q.slug);
+if(!a)return `<div class="mx-auto max-w-3xl px-4 py-32 text-center"><p class="pill mx-auto">404</p><h1 class="display mt-4 text-5xl font-extrabold">Off the beat.</h1><a href="#artists" data-route="artists" class="btn-dark mt-8">Back to artists</a></div>`;
+pr(q.slug);
+const saved=isSaved(q.slug);
+const src=`https://w.soundcloud.com/player/?url=${encodeURIComponent(a.musicEmbed)}&color=%231b1b1f&auto_play=false&hide_related=true&show_user=true&visual=false`;
+const v=a.visible||{};
+const sN=v.name!==false,sI=v.image!==false,sB=v.bio!==false&&a.bio,sC=v.country!==false,sR=v.rate!==false&&a.rate;
+const sS=v.social!==false&&a.social&&Object.values(a.social).some(x=>x);
+return `<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
+<div class="card overflow-hidden">
+<div class="relative h-[320px] sm:h-[420px]">${sI?`<img src="${a.coverImage}" class="absolute inset-0 h-full w-full object-cover" alt=""/>`:`<div class="absolute inset-0 bg-gradient-to-br from-cream-200 to-cream-300"></div>`}<div class="absolute inset-0 bg-gradient-to-t from-ink-700/70 to-transparent"></div>
+<div class="absolute right-4 top-4 flex gap-2"><button id="sb" class="btn-light ${saved?'!border-rose-300 !text-rose-500':''}"><svg width="14" height="14" viewBox="0 0 24 24" fill="${saved?'#ec4899':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l9.84 9.84 9.84-9.84a5.5 5.5 0 0 0 0-7.78z"/></svg><span id="sl">${saved?'Saved':'Save'}</span></button><a href="#ca" class="btn-dark">Contact / Book</a></div>
+</div>
+<div class="p-6 sm:p-10 relative">
+<div class="flex flex-col sm:flex-row gap-6 items-start sm:items-end">
+${sI?`<img src="${a.profileImage}" class="-mt-20 sm:-mt-24 h-32 w-32 sm:h-40 sm:w-40 rounded-3xl border-4 border-cream-100 shadow-xl object-cover flex-shrink-0" alt="${esc(a.name)}"/>`:`<div class="-mt-20 sm:-mt-24 h-32 w-32 sm:h-40 sm:w-40 rounded-3xl border-4 border-cream-100 bg-cream-200 grid place-items-center text-4xl font-bold text-ink-300 flex-shrink-0">${(a.name||'?').slice(0,1)}</div>`}
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-2"><h1 class="display text-4xl sm:text-5xl font-extrabold tracking-tight">${sN?esc(a.name):'Anonymous artist'}</h1>${a.verified?`<span class="pill" style="background:#1B1B1F;color:white">★ Verified</span>`:''}</div>
+<p class="mt-2 text-ink-400 text-sm"><span class="inline-flex items-center gap-1.5">📍 ${esc(a.city||'')}${sC&&a.country?', '+esc(a.country):''}</span></p>
+<div class="mt-2 flex flex-wrap gap-1.5">${(a.genres||[]).map(g=>`<a href="#artists" data-route="artists" data-genre="${g}" class="rounded-full text-[10px] uppercase tracking-wider px-2 py-0.5 bg-cream-100 hover:bg-cream-200 text-ink-700 font-semibold">${g}</a>`).join('')}</div>
+${sR?`<p class="mt-2 inline-flex items-center gap-2 text-sm font-semibold">Booking range: <span class="rounded-full bg-lime px-2 py-0.5">${esc(a.rate)}</span></p>`:''}
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-8 lg:grid-cols-3">
+<div class="lg:col-span-2 space-y-8">
+${sB?`<div class="card p-7"><h2 class="display text-2xl font-extrabold">About</h2><p class="mt-3 text-ink-700 leading-relaxed">${esc(a.bio)}</p></div>`:''}
+${a.musicEmbed?`<div class="card p-7"><h2 class="display text-2xl font-extrabold">Listen</h2><iframe class="mt-4 rounded-2xl border border-ink-100" width="100%" height="166" frameborder="no" loading="lazy" src="${src}"></iframe></div>`:''}
+<div id="ca" class="card p-7 bg-cream-50">
+<h2 class="display text-2xl font-extrabold">Contact / Book ${esc(a.name)}</h2>
+<form id="cf" class="mt-5 space-y-4">
+<div class="grid sm:grid-cols-2 gap-3"><div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Your name</label><input class="input mt-1" name="name" required minlength="2"/></div><div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Email</label><input class="input mt-1" type="email" name="email" required/></div></div>
+<div>
+<div class="flex items-center justify-between mb-1"><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Message</label><button type="button" id="useTpl" class="text-[11px] text-ink-400 hover:text-ink-700 underline-offset-4 hover:underline">↻ Reset template</button></div>
+<textarea class="input mt-1 text-sm leading-relaxed" rows="14" name="message" id="cfMsg" required minlength="40">Hi ${esc(a.name)},
+
+I'd like to book you for an upcoming event. Here are the details:
+
+  • Event:
+  • Date:
+  • Venue &amp; city:
+  • Expected capacity:
+  • Set length:
+  • Budget range:    €
+
+A bit about us:
+
+
+Tech notes / requests:
+
+
+Looking forward to hearing from you!
+
+[Your name]
+[Venue / promoter]</textarea>
+<p class="text-[11px] text-ink-300 mt-1">Edit any line. The template is just a starting point — replace the blanks with your specifics.</p>
+</div>
+<button class="btn-dark" type="submit">Send message →</button>
+<div id="cs" class="hidden rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800"></div>
+</form>
+</div>
+</div>
+<aside class="space-y-6">
+${sS?`<div class="card p-6"><h3 class="display text-lg font-extrabold">Social</h3>
+<ul class="mt-3 space-y-2 text-sm">${Object.entries(a.social||{}).filter(([k,v])=>v).map(([k,v])=>`<li><a href="${v==='#'?'#':v}" ${v==='#'?'':'target="_blank" rel="noreferrer"'} class="flex items-center gap-3 rounded-xl p-2 hover:bg-cream-100"><span class="grid h-8 w-8 place-items-center rounded-full bg-ink-700 text-peach text-[10px] font-bold">${k.slice(0,2).toUpperCase()}</span><span class="font-medium">${labelSocial(k)}</span><svg class="ml-auto text-ink-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></li>`).join('')}</ul>
+</div>`:''}
+<div class="card p-6"><h3 class="display text-lg font-extrabold">Stats</h3>
+<dl class="mt-3 grid grid-cols-2 gap-4 text-sm">
+<div><dt class="text-xs uppercase tracking-wider text-ink-300">Popularity</dt><dd class="display mt-1 text-2xl font-extrabold">${a.popularity}</dd></div>
+<div><dt class="text-xs uppercase tracking-wider text-ink-300">Genres</dt><dd class="mt-1">${(a.genres||[]).length}</dd></div>
+</dl>
+</div>
+</aside>
+</section>`}
+function labelSocial(k){return ({website:'Website',instagram:'Instagram',soundcloud:'SoundCloud',appleMusic:'Apple Music',facebook:'Facebook',spotify:'Spotify',youtube:'Youtube',twitter:'X (Twitter)',bandcamp:'Bandcamp'})[k]||k}
+function bookingTpl(name){return `Hi ${name},\n\nI'd like to book you for an upcoming event. Here are the details:\n\n  • Event:\n  • Date:\n  • Venue & city:\n  • Expected capacity:\n  • Set length:\n  • Budget range:    €\n\nA bit about us:\n\n\nTech notes / requests:\n\n\nLooking forward to hearing from you!\n\n[Your name]\n[Venue / promoter]`}
+function aProfile(q){
+const ar=ARTISTS.find(x=>x.slug===q.slug);
+const tpl=document.getElementById('useTpl');
+if(tpl)tpl.addEventListener('click',()=>{const t=document.getElementById('cfMsg');if(t&&ar)t.value=bookingTpl(ar.name)});
+const sb=document.getElementById('sb');
+if(sb)sb.addEventListener('click',()=>{const now=toggleSaved(q.slug);sb.classList.toggle('!border-rose-300',now);sb.classList.toggle('!text-rose-500',now);const svg=sb.querySelector('svg');svg.setAttribute('fill',now?'#ec4899':'none');document.getElementById('sl').textContent=now?'Saved':'Save'});
+const f=document.getElementById('cf');
+if(f)f.addEventListener('submit',e=>{
+e.preventDefault();
+if(!f.checkValidity()){f.reportValidity();return}
+const subs=loadSubs();
+const venue=subs.find(s=>s.period==='inquiry');
+const price=venue?venue.price:5;
+const quota=venue?(venue.freeQuota||0):0;
+const used=+(localStorage.getItem('pulse:inq')||0);
+const ar=ARTISTS.find(x=>x.slug===q.slug);
+const em=ar&&ar.email||'artist@pulse.io';
+const mask=em.replace(/^(.{2}).*(@.*)$/,'$1***$2');
+const finish=(msg,sub)=>{const s=document.getElementById('cs');s.classList.remove('hidden');s.innerHTML=`<p class="font-semibold">${msg}</p>${sub?`<p class="text-xs mt-1 text-emerald-700">${sub}</p>`:''}`;localStorage.setItem('pulse:inq',used+1);f.reset()};
+const sub=`Forwarded to ${esc(ar?ar.name:'the artist')}'s booking inbox (${esc(mask)}). PULSE never shares the artist's address with senders.`;
+if(used<quota){finish(`Message sent — your first inquiry was free.`,sub);return}
+payModal(price,()=>finish(`Paid €${price}. Message delivered.`,sub));
+});
+}
+function payModal(price,onPaid){
+openModal(`<div class="bg-white p-6 sm:p-8">
+<div class="flex items-center gap-3 mb-5"><span class="grid h-10 w-10 place-items-center rounded-2xl bg-peach text-ink-700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span><div><h2 class="display text-xl font-extrabold">Pay to send message</h2><p class="text-xs text-ink-400">Direct delivery to the artist's inbox</p></div><button id="closeModal" class="ml-auto h-8 w-8 grid place-items-center rounded-full border border-ink-100 bg-white text-ink-700">✕</button></div>
+<div class="card p-4 bg-cream-50 mb-5"><p class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Inquiry fee</p><p class="display text-3xl font-extrabold mt-1">€${price}</p><p class="text-xs text-ink-400 mt-1">One-time charge per artist inquiry. No subscription.</p></div>
+<form id="pf" class="space-y-3">
+<div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Card number</label><input class="input mt-1" required placeholder="4242 4242 4242 4242"/></div>
+<div class="grid grid-cols-2 gap-3"><div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Expiry</label><input class="input mt-1" required placeholder="MM/YY"/></div><div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">CVC</label><input class="input mt-1" required placeholder="123"/></div></div>
+<div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Name on card</label><input class="input mt-1" required placeholder="Jane Booker"/></div>
+<button type="submit" class="btn-dark w-full">Pay €${price} & send message</button>
+<p class="text-xs text-ink-300 text-center">Demo · no real charge · Stripe-ready</p>
+</form>
+</div>`);
+document.getElementById('pf').addEventListener('submit',e=>{e.preventDefault();closeModal();onPaid()});
+}
+
+/* AUTH */
+function rAuth(kind){const isLogin=kind==='login';return `<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 items-center min-h-[80vh] py-10">
+<div><p class="pill"><span class="dot"></span> ${isLogin?'Log in':'Sign up'}</p>
+<h1 class="display mt-5 text-4xl sm:text-6xl font-extrabold tracking-tight">${isLogin?'Welcome back.':'Join the underground.'}</h1>
+<p class="mt-4 text-ink-400 max-w-md">${isLogin?"Sign in with your email — we'll send a magic link.":'Create an account to save artists.'}</p></div>
+<div class="card p-7 sm:p-9">
+<form id="af" class="space-y-5">
+<div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Email</label><input id="ae" type="email" required class="input mt-1" placeholder="you@example.com"/></div>
+<button class="btn-dark w-full" type="submit">${isLogin?'Send magic link':'Create account'} →</button>
+<div id="as" class="hidden rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800"></div>
+<p class="text-xs text-ink-400 text-center">${isLogin?'New here?':'Already have an account?'} <a href="#${isLogin?'signup':'login'}" data-route="${isLogin?'signup':'login'}" class="font-semibold text-ink-700 underline">${isLogin?'Create account':'Sign in'}</a></p>
+</form>
+</div>
+</section>`}
+function aAuth(){const f=document.getElementById('af');if(f)f.addEventListener('submit',e=>{e.preventDefault();const em=document.getElementById('ae').value;const s=document.getElementById('as');s.classList.remove('hidden');s.innerHTML=`<p class="font-semibold">Check your inbox</p><p>Demo link sent to <strong>${esc(em)}</strong>.</p>`})}
+
+/* JOIN */
+const SUBS_KEY='pulse:admin:subscriptions';
+const FALLBACK_SUBS=[{id:'sub_artist',name:'Artist · Annual',price:99,originalPrice:199,currency:'EUR',period:'year',features:['Public profile','Bookings inbox','SoundCloud embed','Monthly performance report','Featured rotation eligibility','Verified badge eligible'],status:'active',isDefault:true},{id:'sub_venue',name:'Venue · Pay-per-inquiry',price:5,currency:'EUR',period:'inquiry',freeQuota:1,features:['First inquiry is free','€5 per inquiry after','Direct artist messaging','No subscription, pay as you go'],status:'active'}];
+function loadSubs(){try{const v=JSON.parse(localStorage.getItem(SUBS_KEY));if(Array.isArray(v)&&v.length&&!v.some(s=>['sub_basic','sub_pro','sub_label'].includes(s.id)))return v.filter(s=>s.status==='active')}catch{}return FALLBACK_SUBS}
+const cur=c=>({EUR:'€',USD:'$',GBP:'£',JPY:'¥'}[c]||'');
+const slugifyP=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+
+let JD={step:1,tierId:null,email:'',name:'',city:'',country:'',genres:'',bio:'',profileImage:'',rate:'',verifiedAddon:false,featuredAddon:false,social:{instagram:'',soundcloud:'',spotify:''}};
+const ADDON_PRICE=20;
+
+function rJoin(){
+const subs=loadSubs();
+if(!JD.tierId){const def=subs.find(s=>s.isDefault)||subs[0];if(def)JD.tierId=def.id}
+return `<section class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10">
+<div class="text-center"><p class="pill mx-auto"><span class="dot"></span> For artists</p><h1 class="display mt-5 text-4xl sm:text-6xl font-extrabold tracking-tight">List your <span class="ua">profile</span>.</h1><p class="mt-4 text-ink-400 max-w-2xl mx-auto">Build a profile, choose an annual plan, and let venues find you.</p></div>
+<div class="mt-10 flex items-center justify-center gap-2 text-xs uppercase tracking-widest text-ink-300">${[1,2,3].map(n=>`<span class="flex items-center gap-2"><span class="grid h-7 w-7 place-items-center rounded-full ${JD.step>=n?'bg-ink-700 text-white':'bg-ink-100 text-ink-400'} font-bold">${n}</span><span class="${JD.step>=n?'text-ink-700':'text-ink-300'} hidden sm:inline">${n===1?'Pick plan':n===2?'Profile':'Review'}</span>${n<3?'<span class="w-8 sm:w-12 h-px bg-ink-100"></span>':''}</span>`).join('')}</div>
+<div class="mt-10">${joinStep(subs)}</div>
+</section>`}
+
+function joinStep(subs){
+if(JD.step===1){return `<div class="grid gap-5 md:grid-cols-2 items-stretch">${subs.map(s=>{const sel=JD.tierId===s.id;const per=s.period==='inquiry'?'/inquiry':s.period==='year'?'/year':'/month';const orig=s.originalPrice?`<span class="display text-2xl font-extrabold text-ink-300 line-through mr-2">${cur(s.currency)}${s.originalPrice}</span>`:'';const isInq=s.period==='inquiry';return `<button type="button" class="tier-card text-left card p-7 relative overflow-hidden flex flex-col h-full ${sel?'ring-2 ring-ink-700':''}" data-id="${s.id}">${s.isDefault&&!s.originalPrice?'<span class="absolute right-4 top-4 pill" style="background:#1B1B1F;color:white">Recommended</span>':''}${s.originalPrice?'<span class="absolute right-4 top-4 pill" style="background:#C7F26C">Save '+Math.round((1-s.price/s.originalPrice)*100)+'%</span>':''}<span class="grid h-12 w-12 place-items-center rounded-2xl ${s.isDefault?'bg-peach':'bg-lime'} text-2xl">★</span><h3 class="display mt-4 text-xl font-extrabold">${esc(s.name)}</h3><div class="mt-2 flex items-baseline flex-wrap">${orig}<span class="display text-4xl font-extrabold">${cur(s.currency)}${s.price.toLocaleString()}</span><span class="text-sm font-medium text-ink-400 ml-1">${per}</span></div>${s.freeQuota?`<p class="text-xs mt-1" style="color:#3a8b00">First ${s.freeQuota} ${isInq?'inquir'+(s.freeQuota>1?'ies':'y'):''} free ✓</p>`:''}<ul class="mt-5 space-y-2 text-sm flex-1">${(s.features||[]).map(f=>`<li class="flex items-center gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.5" class="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>${esc(f)}</li>`).join('')}</ul></button>`}).join('')}</div><div class="mt-8 flex justify-end"><button id="step1Next" class="btn-dark">Continue →</button></div>`}
+if(JD.step===2){return `<form id="profileForm" class="card p-7 sm:p-9 space-y-5">
+<div class="grid sm:grid-cols-2 gap-4">
+<div class="sm:col-span-2"><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Email</label><input class="input mt-1" id="jfEmail" type="email" required value="${esc(JD.email)}"/></div>
+<div class="sm:col-span-2"><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Artist name</label><input class="input mt-1" id="jfName" required minlength="2" value="${esc(JD.name)}"/></div>
+<div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">City</label><input class="input mt-1" id="jfCity" value="${esc(JD.city)}"/></div>
+<div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Country</label><input class="input mt-1" id="jfCountry" value="${esc(JD.country)}"/></div>
+<div class="sm:col-span-2"><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Genres</label><input class="input mt-1" id="jfGenres" value="${esc(JD.genres)}" placeholder="Industrial, Hard Techno"/></div>
+<div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Profile image</label><label id="jfImgDrop" class="mt-1 block cursor-pointer rounded-xl border-2 border-dashed border-ink-100 hover:border-ink-700 bg-white overflow-hidden">${JD.profileImage?`<img src="${esc(JD.profileImage)}" class="block w-full aspect-video object-cover" alt=""/>`:`<div class="text-center px-4 py-6 text-ink-400"><svg class="mx-auto mb-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><p class="text-sm font-semibold text-ink-700">Click or drag to upload</p><p class="text-xs">PNG/JPG · max 3 MB</p></div>`}<input type="file" id="jfImgFile" accept="image/*" class="hidden"/></label></div>
+<div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Booking range</label><div class="relative mt-1"><span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700 font-semibold pointer-events-none">€</span><input class="input pl-8" id="jfRate" value="${esc(JD.rate)}" placeholder="800 — 1,500"/></div></div>
+<div class="sm:col-span-2"><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">Bio</label><textarea class="input mt-1" id="jfBio" rows="4">${esc(JD.bio)}</textarea></div>
+<div class="sm:col-span-2"><h4 class="text-xs uppercase tracking-wider text-ink-300 font-semibold mt-2 mb-1">Social links</h4></div>
+${[['Website','website','yourdomain.com'],['Instagram','instagram','instagram.com/'],['SoundCloud','soundcloud','soundcloud.com/'],['Apple Music','appleMusic','music.apple.com/'],['Facebook','facebook','facebook.com/'],['Spotify','spotify','open.spotify.com/artist/'],['YouTube','youtube','youtube.com/@'],['X (Twitter)','twitter','x.com/']].map(([lbl,k,ph])=>`<div><label class="text-xs uppercase tracking-wider text-ink-300 font-semibold">${lbl}</label><input class="input mt-1" id="jf-${k}" value="${esc(JD.social[k]||'')}" placeholder="https://${ph}…"/></div>`).join('')}
+</div>
+<div class="flex items-center justify-between gap-3 pt-3 border-t border-ink-100"><button type="button" id="step2Back" class="btn-light">← Back</button><button type="submit" class="btn-dark">Continue →</button></div>
+</form>`}
+const tier=subs.find(s=>s.id===JD.tierId);
+return `<div class="grid gap-5 lg:grid-cols-3">
+<div class="lg:col-span-2 card p-7"><h3 class="display text-xl font-extrabold">Review</h3>
+<div class="mt-5 grid sm:grid-cols-3 gap-4 items-start">
+<div class="sm:col-span-1">${JD.profileImage?`<img src="${esc(JD.profileImage)}" class="w-full aspect-square object-cover rounded-2xl"/>`:`<div class="w-full aspect-square rounded-2xl bg-cream-200 grid place-items-center text-4xl font-bold text-ink-300">${(JD.name||'?').slice(0,1)}</div>`}</div>
+<div class="sm:col-span-2"><p class="display text-2xl font-extrabold">${esc(JD.name||'—')}</p><p class="text-sm text-ink-400 mt-1">${esc(JD.city||'—')}${JD.country?', '+esc(JD.country):''}</p>${JD.rate?`<p class="mt-3 inline-flex items-center gap-2 text-sm font-semibold">Booking: <span class="rounded-full bg-lime px-2 py-0.5">€${esc(JD.rate)}</span></p>`:''}${JD.bio?`<p class="mt-3 text-ink-700 text-sm">${esc(JD.bio)}</p>`:''}</div>
+</div></div>
+<div class="card p-7 bg-cream-50">
+<h3 class="display text-lg font-extrabold">Subscription</h3>
+<p class="text-sm text-ink-400 mt-1">${tier?esc(tier.name):'Annual plan'}</p>
+<div class="mt-3 pb-3 border-b border-ink-100 flex items-center justify-between"><span class="text-sm">${tier?'Annual fee':'Plan'}</span><span class="font-semibold">${cur(tier&&tier.currency||'EUR')}${tier?tier.price:99}</span></div>
+<label class="flex items-start gap-3 py-3 border-b border-ink-100 cursor-pointer">
+<input type="checkbox" id="addonVer" class="mt-0.5 accent-neon-violet" ${JD.verifiedAddon?'checked':''}/>
+<div class="flex-1 min-w-0"><p class="font-semibold text-sm">Verified badge</p><p class="text-xs text-ink-400 mt-0.5">Cyan check on your profile and listing card. Builds trust with venues.</p></div>
+<span class="font-semibold text-sm whitespace-nowrap">+€${ADDON_PRICE}</span>
+</label>
+<label class="flex items-start gap-3 py-3 border-b border-ink-100 cursor-pointer">
+<input type="checkbox" id="addonFeat" class="mt-0.5 accent-neon-violet" ${JD.featuredAddon?'checked':''}/>
+<div class="flex-1 min-w-0"><p class="font-semibold text-sm">Featured on homepage</p><p class="text-xs text-ink-400 mt-0.5">Rotate through the homepage hero (every 5 seconds).</p></div>
+<span class="font-semibold text-sm whitespace-nowrap">+€${ADDON_PRICE}</span>
+</label>
+<div class="pt-3 flex items-center justify-between"><span class="text-sm font-semibold">Total today</span><span class="display text-2xl font-extrabold">${cur(tier&&tier.currency||'EUR')}${(tier?tier.price:99)+(JD.verifiedAddon?ADDON_PRICE:0)+(JD.featuredAddon?ADDON_PRICE:0)}</span></div>
+<p class="text-xs text-ink-400 mt-3">Demo: publish creates a pending application in admin. No real charge.</p>
+</div>
+<div class="lg:col-span-3 flex items-center justify-between gap-3"><button type="button" id="step3Back" class="btn-light">← Back</button><button type="button" id="publishBtn" class="btn-dark">Pay €${(tier?tier.price:99)+(JD.verifiedAddon?ADDON_PRICE:0)+(JD.featuredAddon?ADDON_PRICE:0)} & publish →</button></div>
+</div>`}
+
+function aJoin(){
+document.querySelectorAll('.tier-card').forEach(b=>b.addEventListener('click',()=>{JD.tierId=b.getAttribute('data-id');document.querySelectorAll('.tier-card').forEach(x=>x.classList.remove('ring-2','ring-ink-700'));b.classList.add('ring-2','ring-ink-700')}));
+const n1=document.getElementById('step1Next');if(n1)n1.addEventListener('click',()=>{JD.step=2;render()});
+const b2=document.getElementById('step2Back');if(b2)b2.addEventListener('click',()=>{JD.step=1;render()});
+function cap(){const g=id=>{const e=document.getElementById(id);return e?e.value.trim():''};JD.email=g('jfEmail');JD.name=g('jfName');JD.city=g('jfCity');JD.country=g('jfCountry');JD.genres=g('jfGenres');JD.rate=g('jfRate');JD.bio=g('jfBio');JD.social=['website','instagram','soundcloud','appleMusic','facebook','spotify','youtube','twitter'].reduce((o,k)=>{o[k]=g('jf-'+k);return o},{})}
+const drop=document.getElementById('jfImgDrop'),fi=document.getElementById('jfImgFile');
+function hf(f){if(!f)return;if(!f.type.startsWith('image/'))return alert('Image only');if(f.size>3*1024*1024)return alert('Max 3 MB');const r=new FileReader();r.onload=()=>{cap();JD.profileImage=r.result;render()};r.readAsDataURL(f)}
+if(fi)fi.addEventListener('change',e=>hf(e.target.files&&e.target.files[0]));
+if(drop){['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('border-ink-700')}));['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('border-ink-700')}));drop.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)hf(f)})}
+const f2=document.getElementById('profileForm');if(f2)f2.addEventListener('submit',e=>{e.preventDefault();cap();JD.step=3;render()});
+const b3=document.getElementById('step3Back');if(b3)b3.addEventListener('click',()=>{JD.step=2;render()});
+const aV=document.getElementById('addonVer');if(aV)aV.addEventListener('change',e=>{JD.verifiedAddon=e.target.checked;render()});
+const aF=document.getElementById('addonFeat');if(aF)aF.addEventListener('change',e=>{JD.featuredAddon=e.target.checked;render()});
+const pub=document.getElementById('publishBtn');if(pub)pub.addEventListener('click',publishApp);
+}
+
+function publishApp(){
+const slug=slugifyP(JD.name)||'artist-'+Math.random().toString(36).slice(2,7);
+const a={id:'a'+Math.random().toString(36).slice(2,7),slug,name:JD.name,genres:JD.genres.split(',').map(s=>s.trim()).filter(Boolean),city:JD.city,country:JD.country,bio:JD.bio,profileImage:JD.profileImage,coverImage:JD.profileImage,email:JD.email,rate:JD.rate?'€'+JD.rate:'',popularity:30,verified:!!JD.verifiedAddon,featured:!!JD.featuredAddon,views:0,clicks:0,status:'pending',subTierId:JD.tierId,createdAt:new Date().toISOString().slice(0,10),visible:{name:true,image:true,bio:true,social:true,events:true,country:true,rate:true},social:{...JD.social},gallery:[],events:[]};
+let list=[];try{list=JSON.parse(localStorage.getItem(ADMIN_KEY))||[]}catch{}if(!Array.isArray(list))list=[];
+list.unshift(a);
+localStorage.setItem(ADMIN_KEY,JSON.stringify(list));
+if(typeof BroadcastChannel!=='undefined'){try{new BroadcastChannel('pulse:data').postMessage({type:'artists'})}catch{}}
+JD={step:1,tierId:null,email:'',name:'',city:'',country:'',genres:'',bio:'',profileImage:'',rate:'',verifiedAddon:false,featuredAddon:false,social:{instagram:'',soundcloud:'',spotify:''}};
+app.innerHTML=`<section class="mx-auto max-w-2xl px-4 py-20 text-center"><div class="inline-grid h-16 w-16 place-items-center rounded-full bg-lime mb-6 text-3xl">🎉</div><h1 class="display text-4xl sm:text-5xl font-extrabold tracking-tight">Application received!</h1><p class="mt-4 text-ink-400">Thanks ${esc(a.name)}. We'll email <strong>${esc(a.email)}</strong> when it goes live.</p><div class="mt-8 flex justify-center gap-3"><a href="#home" data-route="home" class="btn-light">Back to home</a><a href="#artists" data-route="artists" class="btn-dark">Explore artists</a></div></section>`;
+window.scrollTo({top:0});
+}
+
+/* Reveal */
+function initReveal(){const els=document.querySelectorAll('.reveal:not(.visible)');if(!('IntersectionObserver' in window)){els.forEach(el=>el.classList.add('visible'));return}const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}}),{rootMargin:'-50px'});els.forEach(el=>io.observe(el))}
+
+/* Nav scroll */
+(()=>{const inner=document.getElementById('navInner');const onS=()=>{if(window.scrollY>8){inner.classList.add('bg-white','border','border-ink-100','shadow-sm')}else{inner.classList.remove('bg-white','border','border-ink-100','shadow-sm')}};onS();addEventListener('scroll',onS,{passive:true})})();
+
+/* Mobile menu */
+const mb=document.getElementById('menuBtn'),mm=document.getElementById('mobileMenu');let mO=false;
+function closeMM(){mO=false;if(mm)mm.style.maxHeight='0'}
+if(mb)mb.addEventListener('click',()=>{mO=!mO;mm.style.maxHeight=mO?mm.scrollHeight+'px':'0'});
+
+/* Modal */
+const modal=document.getElementById('modal'),modalContent=document.getElementById('modalContent');
+function openModal(html){modalContent.innerHTML=html;modal.classList.add('open');document.body.style.overflow='hidden'}
+function closeModal(){modal.classList.remove('open');document.body.style.overflow=''}
+if(modal)modal.addEventListener('click',e=>{if(e.target===modal||e.target.id==='closeModal')closeModal()});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+render();
+</script>
+</body>
+</html>
