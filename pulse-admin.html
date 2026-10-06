@@ -1,0 +1,1941 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PULSE — Admin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0a0c'/%3E%3Cdefs%3E%3ClinearGradient id='g'%3E%3Cstop offset='0%25' stop-color='%239d4bff'/%3E%3Cstop offset='100%25' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='ui-sans-serif' font-weight='800' font-size='28' fill='url(%23g)'%3EP%3C/text%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+tailwind.config = { darkMode:'class', theme:{ extend:{
+  colors:{
+    bg:    {0:"#08080a", 1:"#0c0c10", 2:"#111116", 3:"#15151c", 4:"#1c1c25"},
+    line:  {DEFAULT:"#23232c"},
+    fg:    {0:"#f8f8fa", 1:"#cfcfd6", 2:"#9a9aa8", 3:"#6b6b78", 4:"#3f3f48"},
+    neon:  {violet:"#9d4bff", purple:"#7c3aed", blue:"#3b82f6", cyan:"#22d3ee", lime:"#a3ff12", pink:"#ff2bd6", rose:"#fb7185", amber:"#f59e0b"}
+  },
+  fontFamily:{ sans:['Inter','ui-sans-serif','system-ui'] }
+}}}
+</script>
+<style>
+  html,body{background:#08080a;color:#f8f8fa;}
+  body{font-family:'Inter',ui-sans-serif,system-ui;-webkit-font-smoothing:antialiased;}
+  ::selection{background:rgba(157,75,255,.5);color:white;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-track{background:#0c0c10;}
+  ::-webkit-scrollbar-thumb{background:#23232c;border-radius:999px;}
+  ::-webkit-scrollbar-thumb:hover{background:#3f3f48;}
+
+  .neon-text{background:linear-gradient(90deg,#9d4bff,#3b82f6 50%,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border-radius:.625rem;padding:.55rem 1rem;font-weight:500;font-size:.875rem;transition:all .2s;cursor:pointer;border:1px solid transparent;line-height:1.1;text-decoration:none;}
+  .btn-primary{background:linear-gradient(180deg,#9d4bff,#7c3aed);color:white;box-shadow:0 0 0 1px rgba(157,75,255,.4),0 6px 16px -8px rgba(157,75,255,.55);}
+  .btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px);}
+  .btn-secondary{background:#15151c;color:#f8f8fa;border-color:#23232c;}
+  .btn-secondary:hover{background:#1c1c25;border-color:#3f3f48;}
+  .btn-danger{background:rgba(251,113,133,.08);color:#fb7185;border-color:rgba(251,113,133,.3);}
+  .btn-danger:hover{background:rgba(251,113,133,.16);}
+  .btn-icon{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:.5rem;color:#9a9aa8;transition:all .15s;background:transparent;border:0;cursor:pointer;}
+  .btn-icon:hover{background:#15151c;color:#f8f8fa;}
+  .input{width:100%;border-radius:.625rem;border:1px solid #23232c;background:#0c0c10;padding:.6rem .9rem;color:#f8f8fa;font-size:.875rem;transition:all .2s;}
+  .input:focus{outline:none;border-color:rgba(157,75,255,.6);box-shadow:0 0 0 3px rgba(157,75,255,.15);}
+  .input::placeholder{color:#6b6b78;}
+  textarea.input{resize:vertical;min-height:80px;}
+  select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%239a9aa8' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .65rem center;background-size:14px;padding-right:2.2rem;}
+  .label{display:block;font-size:.7rem;font-weight:600;color:#9a9aa8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;}
+
+  .card{background:#0c0c10;border:1px solid #1c1c25;border-radius:.875rem;}
+  .stat-card{padding:1.25rem;background:#0c0c10;border:1px solid #1c1c25;border-radius:.875rem;position:relative;overflow:hidden;}
+
+  .pill{display:inline-flex;align-items:center;gap:.4rem;border-radius:999px;padding:.15rem .55rem;font-size:.7rem;font-weight:600;}
+  .pill-violet{background:rgba(157,75,255,.12);color:#c79dff;border:1px solid rgba(157,75,255,.3);}
+  .pill-cyan{background:rgba(34,211,238,.10);color:#67e8f9;border:1px solid rgba(34,211,238,.3);}
+  .pill-lime{background:rgba(163,255,18,.10);color:#bef264;border:1px solid rgba(163,255,18,.25);}
+  .pill-amber{background:rgba(245,158,11,.10);color:#fbbf24;border:1px solid rgba(245,158,11,.3);}
+  .pill-rose{background:rgba(251,113,133,.10);color:#fda4af;border:1px solid rgba(251,113,133,.3);}
+  .pill-muted{background:#15151c;color:#9a9aa8;border:1px solid #23232c;}
+
+  /* Visibility toggle (eye icon pill) used on the artist edit form */
+  .vis-toggle{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .55rem;border-radius:9999px;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:all .15s;border:1px solid;background:transparent;line-height:1;user-select:none;}
+  .vis-toggle.on{color:#bef264;background:rgba(163,255,18,.08);border-color:rgba(163,255,18,.3);}
+  .vis-toggle.on:hover{background:rgba(163,255,18,.14);}
+  .vis-toggle.off{color:#9a9aa8;background:#15151c;border-color:#23232c;}
+  .vis-toggle.off:hover{color:#cfcfd6;border-color:#3f3f48;}
+  .field-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;gap:.75rem;}
+  .field-row .label{margin-bottom:0;}
+
+  .nav-item{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border-radius:.625rem;font-size:.875rem;color:#9a9aa8;transition:all .15s;cursor:pointer;}
+  .nav-item:hover{background:#15151c;color:#f8f8fa;}
+  .nav-item.active{background:linear-gradient(90deg,rgba(157,75,255,.16),rgba(157,75,255,.04));color:#f8f8fa;border-left:2px solid #9d4bff;padding-left:calc(.8rem - 2px);}
+  .nav-item .icon{width:1rem;height:1rem;flex-shrink:0;}
+
+  /* Live dot */
+  .live-dot{position:relative;display:inline-flex;width:.5rem;height:.5rem;}
+  .live-dot::before{content:"";position:absolute;inset:0;border-radius:50%;background:#a3ff12;animation:livePing 2s cubic-bezier(0,0,.2,1) infinite;opacity:.7;}
+  .live-dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:#a3ff12;}
+  @keyframes livePing{75%,100%{transform:scale(2.5);opacity:0;}}
+
+  /* Skeleton */
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+  .skeleton{background:linear-gradient(90deg,#15151c 25%,#1c1c25 50%,#15151c 75%);background-size:200% 100%;animation:shimmer 1.4s linear infinite;border-radius:.5rem;}
+
+  /* Page transition */
+  .pf{animation:pf .25s ease-out both;}
+  @keyframes pf{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none;}}
+
+  /* Drawer */
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:#0a0a0c;border-left:1px solid #1c1c25;transform:translateX(100%);transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:60;display:flex;flex-direction:column;}
+  .drawer.open{transform:translateX(0);}
+  .drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .25s;z-index:55;}
+  .drawer-backdrop.open{opacity:1;pointer-events:auto;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#15151c;border:1px solid #23232c;border-radius:.625rem;padding:.8rem 1rem;color:#f8f8fa;font-size:.875rem;display:flex;align-items:center;gap:.6rem;z-index:80;transform:translateY(100px);opacity:0;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .25s;box-shadow:0 12px 32px -8px rgba(0,0,0,.5);max-width:min(420px,calc(100% - 3rem));}
+  .toast.show{transform:translateY(0);opacity:1;}
+
+  /* Drag-drop */
+  .dropzone{border:2px dashed #23232c;border-radius:.875rem;padding:2.5rem 1rem;text-align:center;background:#0c0c10;transition:all .2s;}
+  .dropzone.over{border-color:#9d4bff;background:rgba(157,75,255,.05);}
+
+  /* Table */
+  table.t{width:100%;border-collapse:separate;border-spacing:0;}
+  table.t th{text-align:left;font-size:.7rem;font-weight:600;color:#9a9aa8;text-transform:uppercase;letter-spacing:.08em;padding:.65rem .8rem;background:#0a0a0c;border-bottom:1px solid #1c1c25;position:sticky;top:0;z-index:1;}
+  table.t td{padding:.7rem .8rem;border-bottom:1px solid #15151c;font-size:.875rem;}
+  table.t tr:last-child td{border-bottom:0;}
+  table.t tr:hover td{background:#0e0e13;}
+  table.t input[type="checkbox"]{accent-color:#9d4bff;}
+
+  /* Tooltip */
+  [data-tip]{position:relative;}
+  [data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);padding:.3rem .55rem;border-radius:.4rem;background:#15151c;border:1px solid #23232c;font-size:.7rem;color:#cfcfd6;white-space:nowrap;z-index:50;}
+
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}}
+</style>
+</head>
+<body class="relative min-h-screen overflow-x-hidden">
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="hidden fixed inset-0 z-40 grid place-items-center p-4" style="background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(157,75,255,.18),transparent 60%),#08080a;">
+  <div class="w-full max-w-md">
+    <div class="flex items-center gap-2 justify-center mb-8">
+      <span class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-neon-violet to-neon-cyan font-bold text-white">P</span>
+      <span class="text-xl font-bold tracking-tight">PULSE <span class="text-fg-2 font-medium">Admin</span></span>
+    </div>
+    <div class="card p-8 relative overflow-hidden">
+      <div class="absolute -top-12 left-1/2 -translate-x-1/2 h-24 w-48 bg-neon-violet/30 blur-3xl"></div>
+      <div class="relative">
+        <h1 class="text-2xl font-bold">Sign in to continue</h1>
+        <p class="mt-1 text-sm text-fg-2">Use any email + password to enter the demo.</p>
+        <form id="loginForm" class="mt-6 space-y-4">
+          <div>
+            <label class="label">Email</label>
+            <input id="loginEmail" type="email" required class="input" value="admin@pulse.io"/>
+          </div>
+          <div>
+            <label class="label">Password</label>
+            <input id="loginPwd" type="password" required class="input" placeholder="••••••••"/>
+          </div>
+          <label class="flex items-center gap-2 text-xs text-fg-2"><input type="checkbox" class="accent-neon-violet" checked/> Remember me on this device</label>
+          <button class="btn btn-primary w-full" type="submit">Sign in</button>
+          <p class="text-xs text-fg-3 text-center pt-2">Demo mode · no real auth · stored in localStorage</p>
+        </form>
+      </div>
+    </div>
+    <p class="mt-6 text-center text-xs text-fg-3">© 2026 PULSE · v0.1 admin</p>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="shell" class="hidden">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-bg-1 border-r border-line flex flex-col">
+    <div class="px-5 py-4 flex items-center gap-2 border-b border-line">
+      <span class="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-neon-violet to-neon-cyan font-bold text-white text-sm">P</span>
+      <span class="font-bold tracking-tight flex-1">PULSE <span class="text-fg-2 font-medium text-sm">Admin</span></span>
+      <a href="pulse.html" target="_blank" rel="noopener" class="btn-icon" data-tip="Open public site" title="Open public site">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+    <nav class="px-3 py-4 flex-1 space-y-0.5 text-[0.92rem]" id="nav">
+      <a class="nav-item" data-route="overview">${''}<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview</a>
+      <a class="nav-item" data-route="artists"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M3 21a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="3"/><path d="M21 19a4 4 0 0 0-4-4"/></svg>Artists</a>
+      <a class="nav-item" data-route="users"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Users</a>
+      <a class="nav-item" data-route="analytics"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="20" x2="21" y2="20"/><polyline points="4 14 9 9 13 13 20 6"/></svg>Analytics</a>
+      <a class="nav-item" data-route="imports"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import / Export</a>
+      <a class="nav-item" data-route="subscriptions"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Subscriptions</a>
+      <a class="nav-item" data-route="clients"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>Clients</a>
+      <a class="nav-item" data-route="applications"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Applications<span id="appsBadge" class="ml-auto rounded-full bg-neon-violet/20 px-1.5 text-[10px] text-neon-violet hidden"></span></a>
+      <div class="px-2 pt-6 pb-2 text-[0.65rem] uppercase tracking-widest text-fg-3 font-semibold">System</div>
+      <a class="nav-item" data-route="activity"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Live activity</a>
+      <a class="nav-item" data-route="settings"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.07.27.42.5 1.4.5a2 2 0 1 1 0 4c-.98 0-1.33.23-1.4.5z"/></svg>Settings</a>
+    </nav>
+    <div class="p-3 border-t border-line">
+      <div class="card p-3 flex items-center gap-3">
+        <div class="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-neon-violet to-neon-cyan font-bold text-white text-sm">A</div>
+        <div class="flex-1 min-w-0">
+          <p id="adminEmail" class="text-sm font-medium truncate">admin@pulse.io</p>
+          <p class="text-xs text-fg-3">Super admin</p>
+        </div>
+        <button id="logoutBtn" class="btn-icon" data-tip="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="ml-64">
+    <!-- Topbar -->
+    <header class="sticky top-0 z-20 flex items-center gap-3 px-6 py-3 bg-bg-0/85 backdrop-blur border-b border-line">
+      <h2 id="pageTitle" class="text-lg font-semibold flex-1">Overview</h2>
+      <div class="relative hidden md:block">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-fg-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="globalSearch" class="input pl-9 w-64" placeholder="Search artists, users…"/>
+      </div>
+      <button class="btn-icon" data-tip="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+      <div class="hidden sm:flex items-center gap-2 pl-2 border-l border-line">
+        <span class="live-dot"></span>
+        <span class="text-xs text-fg-2"><span id="liveCount">42</span> online now</span>
+      </div>
+    </header>
+
+    <main id="page" class="p-6"></main>
+  </div>
+</div>
+
+<!-- Drawer (artist add/edit) -->
+<div id="drawerBackdrop" class="drawer-backdrop"></div>
+<aside id="drawer" class="drawer">
+  <div class="px-6 py-4 flex items-center justify-between border-b border-line">
+    <h3 id="drawerTitle" class="text-lg font-semibold">Add artist</h3>
+    <button id="drawerClose" class="btn-icon" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div id="drawerBody" class="flex-1 overflow-y-auto p-6"></div>
+</aside>
+
+<!-- Toast -->
+<div id="toast" class="toast"><span id="toastIcon">✓</span><span id="toastMsg">Done</span></div>
+
+<script>
+/* ===========================================================
+ * PULSE Admin — single-file demo
+ * =========================================================== */
+
+const LS = {
+  auth: "pulse:admin:auth",
+  artists: "pulse:admin:artists",
+  users: "pulse:admin:users",
+  subs: "pulse:admin:subscriptions",
+  clients: "pulse:admin:clients"
+};
+
+/* ----- seed data ----- */
+const u = (id,w=400) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
+
+const SEED_ARTISTS = [
+  {id:"a01",name:"Kaer Vex",slug:"kaer-vex",genres:["Industrial","Hard Techno"],city:"Berlin",country:"Germany",profileImage:u("1493225457124-a3eb161ffa5f"),email:"bookings+kaervex@example.com",popularity:92,verified:true,views:14200,clicks:842,createdAt:"2025-08-12",rate:"€2,400 — €4,500",status:"active",social:{website:"https://kaervex.com",instagram:"https://instagram.com/kaervex",soundcloud:"https://soundcloud.com/kaervex",appleMusic:"",facebook:"",spotify:"https://open.spotify.com/artist/kaervex",youtube:"",twitter:""}},
+  {id:"a02",name:"Lunaïre",slug:"lunaire",genres:["Melodic Techno","Hypnotic"],city:"Paris",country:"France",profileImage:u("1518770660439-4636190af475"),email:"hello+lunaire@example.com",popularity:88,verified:true,views:11400,clicks:712,createdAt:"2025-09-01",rate:"€1,800 — €3,000",status:"active",social:{website:"",instagram:"https://instagram.com/lunaire",soundcloud:"https://soundcloud.com/lunaire",appleMusic:"",facebook:"",spotify:"https://open.spotify.com/artist/lunaire",youtube:"",twitter:""}},
+  {id:"a03",name:"Ostari",slug:"ostari",genres:["Acid","Peak Time"],city:"Detroit",country:"United States",profileImage:u("1531123897727-8f129e1688ce"),email:"book+ostari@example.com",popularity:81,verified:false,views:8200,clicks:512,createdAt:"2025-09-22",rate:"$1,500 — $2,800",status:"active",social:{website:"",instagram:"https://instagram.com/ostari",soundcloud:"https://soundcloud.com/ostari",appleMusic:"",facebook:"",spotify:"",youtube:"",twitter:""}},
+  {id:"a04",name:"Drelle",slug:"drelle",genres:["Dub Techno","Minimal"],city:"Reykjavík",country:"Iceland",profileImage:u("1500530855697-b586d89ba3ee"),email:"drelle+booking@example.com",popularity:64,verified:false,views:3400,clicks:201,createdAt:"2025-10-04",rate:"€800 — €1,200",status:"active",social:{website:"",instagram:"",soundcloud:"https://soundcloud.com/drelle",appleMusic:"",facebook:"",spotify:"",youtube:"",twitter:""}},
+  {id:"a05",name:"Vexorra",slug:"vexorra",genres:["Hard Techno","Industrial"],city:"Rotterdam",country:"Netherlands",profileImage:u("1488376739305-a0d70de26e0c"),email:"agent+vexorra@example.com",popularity:90,verified:true,views:13600,clicks:903,createdAt:"2025-08-28",rate:"€2,200 — €3,800",status:"active",social:{website:"https://vexorra.eu",instagram:"https://instagram.com/vexorra",soundcloud:"https://soundcloud.com/vexorra",appleMusic:"",facebook:"",spotify:"",youtube:"",twitter:"https://twitter.com/vexorra"}},
+  {id:"a06",name:"Noor Azimi",slug:"noor-azimi",genres:["Hypnotic","Melodic Techno"],city:"Tbilisi",country:"Georgia",profileImage:u("1504593811423-6dd665756598"),email:"noor+book@example.com",popularity:72,verified:false,views:5400,clicks:312,createdAt:"2025-10-18",rate:"€1,200 — €2,000",status:"active",social:{website:"",instagram:"https://instagram.com/nooraz",soundcloud:"https://soundcloud.com/nooraz",appleMusic:"",facebook:"",spotify:"https://open.spotify.com/artist/nooraz",youtube:"",twitter:""}},
+  {id:"a07",name:"Phantasmal",slug:"phantasmal",genres:["Industrial","Acid"],city:"Mexico City",country:"Mexico",profileImage:u("1506794778202-cad84cf45f1d"),email:"phantasmal+ops@example.com",popularity:60,verified:false,views:2800,clicks:98,createdAt:"2025-11-05",rate:"$700 — $1,200",status:"draft",social:{website:"",instagram:"https://instagram.com/phantasmal",soundcloud:"https://soundcloud.com/phantasmal",appleMusic:"",facebook:"",spotify:"",youtube:"",twitter:""}},
+  {id:"a08",name:"Saari",slug:"saari",genres:["Minimal","Dub Techno"],city:"Helsinki",country:"Finland",profileImage:u("1517841905240-472988babdf9"),email:"saari+contact@example.com",popularity:55,verified:false,views:1900,clicks:67,createdAt:"2025-11-22",rate:"€600 — €900",status:"active",social:{website:"",instagram:"",soundcloud:"https://soundcloud.com/saari",appleMusic:"",facebook:"",spotify:"",youtube:"",twitter:""}},
+  {id:"a09",name:"Rytm Gang",slug:"rytm-gang",genres:["Peak Time","Melodic Techno"],city:"London",country:"United Kingdom",profileImage:u("1502980426475-b83966705988"),email:"rytm+gigs@example.com",popularity:84,verified:true,views:10100,clicks:622,createdAt:"2025-12-03",rate:"£1,800 — £3,200",status:"active",social:{website:"https://rytmgang.co.uk",instagram:"https://instagram.com/rytmgang",soundcloud:"https://soundcloud.com/rytmgang",appleMusic:"",facebook:"https://facebook.com/rytmgang",spotify:"https://open.spotify.com/artist/rytmgang",youtube:"https://youtube.com/@rytmgang",twitter:""}},
+  {id:"a10",name:"Tessera",slug:"tessera",genres:["Melodic Techno","Peak Time"],city:"Barcelona",country:"Spain",profileImage:u("1487412720507-e7ab37603c6f"),email:"tessera+book@example.com",popularity:78,verified:false,views:7200,clicks:401,createdAt:"2026-01-12",rate:"€1,400 — €2,600",status:"active",social:{website:"",instagram:"https://instagram.com/tessera",soundcloud:"https://soundcloud.com/tessera",appleMusic:"",facebook:"",spotify:"https://open.spotify.com/artist/tessera",youtube:"",twitter:""}},
+  {id:"a11",name:"KRAAL",slug:"kraal",genres:["Hard Techno","Acid"],city:"Warsaw",country:"Poland",profileImage:u("1519345182560-3f2917c472ef"),email:"kraal+contact@example.com",popularity:70,verified:false,views:5100,clicks:288,createdAt:"2026-01-28",rate:"€900 — €1,600",status:"active",social:{website:"",instagram:"https://instagram.com/kraal",soundcloud:"https://soundcloud.com/kraal",appleMusic:"",facebook:"",spotify:"",youtube:"",twitter:""}},
+  {id:"a12",name:"YUME",slug:"yume",genres:["Hypnotic","Dub Techno"],city:"Tokyo",country:"Japan",profileImage:u("1524504388940-b1c1722653e1"),email:"yume+book@example.com",popularity:66,verified:false,views:4200,clicks:188,createdAt:"2026-02-14",rate:"¥220k — ¥420k",status:"active",social:{website:"",instagram:"https://instagram.com/yume",soundcloud:"https://soundcloud.com/yume",appleMusic:"",facebook:"",spotify:"",youtube:"",twitter:""}}
+];
+
+const FIRSTNAMES=["Mira","Theo","Sam","Lucia","Nikolai","Beth","Aiko","Marco","Zara","Kofi","Ines","Jonas","Priya","Selin","Felix","Noemi","Tariq","Oona","Levi","Hana","Yannick","Elsa","Kenji","Aïsha","Jakob","Romy","Diego","Anya","Tomas","Sade"];
+const LASTNAMES=["Vogt","Peralta","Ricci","Dubois","Becker","Costa","Suzuki","Andersen","Lambert","Singh","Ribeiro","Adeyemi","Lefèvre","Yamada","Klein","Park","Mendes","Okafor","Berg","Morales","Ferreira","Eriksen","Olsen","Akin","Wenzel","Holm","De Vries","Basta","Krause","Roussos"];
+const CITIES=[["Berlin","DE"],["London","UK"],["Paris","FR"],["Amsterdam","NL"],["Tbilisi","GE"],["New York","US"],["Tokyo","JP"],["Mexico City","MX"],["Madrid","ES"],["Warsaw","PL"],["Stockholm","SE"],["Lisbon","PT"]];
+
+function genUsers(n=42){
+  const out=[];
+  const today = new Date('2026-05-04');
+  for(let i=0;i<n;i++){
+    const fn=FIRSTNAMES[i%FIRSTNAMES.length];
+    const ln=LASTNAMES[(i*3)%LASTNAMES.length];
+    const c=CITIES[i%CITIES.length];
+    const daysAgo=Math.floor((Math.sin(i*9)+1)*120);
+    const lastDays=Math.floor((Math.cos(i*5)+1)*15);
+    const signupAt=new Date(today); signupAt.setDate(signupAt.getDate()-daysAgo);
+    const lastAt=new Date(today); lastAt.setDate(lastAt.getDate()-lastDays);
+    out.push({
+      id:'u'+(i+1).toString().padStart(3,'0'),
+      name: fn+' '+ln,
+      email: (fn+ln).toLowerCase().replace(/[^a-z]/g,'')+ '@example.com',
+      city: c[0], country: c[1],
+      signupAt: signupAt.toISOString().slice(0,10),
+      lastAt: lastAt.toISOString().slice(0,10),
+      verified: i%4!==0,
+      saved: Math.floor(Math.random()*8),
+      role: i===0?"Editor":"User"
+    });
+  }
+  return out;
+}
+
+/* time series — synthetic visitors over last 30 days */
+function tsVisitors(days=30, seed=42){
+  let s=seed; const rand=()=>{s=(s*9301+49297)%233280;return s/233280;};
+  const arr=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date('2026-05-04'); d.setDate(d.getDate()-i);
+    const wave=Math.sin(i/4)*180+Math.cos(i/9)*100;
+    const base=900+wave+rand()*220;
+    arr.push({date:d.toISOString().slice(0,10), value:Math.max(60,Math.round(base))});
+  }
+  return arr;
+}
+function tsSignups(days=30, seed=11){
+  let s=seed; const rand=()=>{s=(s*9301+49297)%233280;return s/233280;};
+  const arr=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date('2026-05-04'); d.setDate(d.getDate()-i);
+    const v=Math.max(1, Math.round(8 + Math.sin(i/3)*5 + rand()*4));
+    arr.push({date:d.toISOString().slice(0,10), value:v});
+  }
+  return arr;
+}
+
+/* ===== state / persistence ===== */
+function loadArtists(){
+  try{
+    const v = JSON.parse(localStorage.getItem(LS.artists));
+    if(Array.isArray(v) && v.length) return v;
+  }catch{}
+  return JSON.parse(JSON.stringify(SEED_ARTISTS));
+}
+/* BroadcastChannel: notify same-origin tabs (e.g., the public site) when data changes. */
+const dataChan = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('pulse:data') : null;
+function saveArtists(a){
+  localStorage.setItem(LS.artists, JSON.stringify(a));
+  if(dataChan) dataChan.postMessage({type:'artists', at:Date.now()});
+}
+function loadUsers(){
+  try{
+    const v = JSON.parse(localStorage.getItem(LS.users));
+    if(Array.isArray(v) && v.length) return v;
+  }catch{}
+  const u = genUsers(42); localStorage.setItem(LS.users, JSON.stringify(u)); return u;
+}
+function saveUsers(u){ localStorage.setItem(LS.users, JSON.stringify(u)); }
+
+const SEED_SUBSCRIPTIONS = [
+  { id:'sub_artist', name:'Artist · Annual', price:99, originalPrice:199, currency:'EUR', period:'year', features:['Public profile','Bookings inbox','SoundCloud embed','Monthly performance report','Featured rotation eligibility','Verified badge eligible'], status:'active', isDefault:true },
+  { id:'sub_venue', name:'Venue · Pay-per-inquiry', price:5, currency:'EUR', period:'inquiry', freeQuota:1, features:['First inquiry is free','€5 per inquiry after','Direct artist messaging','No subscription, pay as you go'], status:'active', isDefault:false }
+];
+function loadSubs(){
+  try{
+    const v = JSON.parse(localStorage.getItem(LS.subs));
+    // Migrate: if any old tier (sub_basic/sub_pro/sub_label) is present, replace with fresh seed
+    if(Array.isArray(v) && v.length && !v.some(s=>['sub_basic','sub_pro','sub_label'].includes(s.id))) return v;
+  }catch{}
+  const seed = JSON.parse(JSON.stringify(SEED_SUBSCRIPTIONS));
+  localStorage.setItem(LS.subs, JSON.stringify(seed));
+  return seed;
+}
+function saveSubs(s){
+  localStorage.setItem(LS.subs, JSON.stringify(s));
+  if(typeof dataChan !== 'undefined' && dataChan) dataChan.postMessage({type:'subs', at:Date.now()});
+}
+
+const SEED_CLIENTS = [
+  { id:'cl_tresor',     name:'Tresor',      logo:'', status:'active' },
+  { id:'cl_bassiani',   name:'Bassiani',    logo:'', status:'active' },
+  { id:'cl_berghain',   name:'Berghain',    logo:'', status:'active' },
+  { id:'cl_khidi',      name:'Khidi',       logo:'', status:'active' },
+  { id:'cl_fabric',     name:'fabric',      logo:'', status:'active' },
+  { id:'cl_awakenings', name:'Awakenings',  logo:'', status:'active' },
+  { id:'cl_sonar',      name:'Sónar',       logo:'', status:'active' },
+  { id:'cl_printworks', name:'Printworks',  logo:'', status:'active' },
+  { id:'cl_dekmantel',  name:'Dekmantel',   logo:'', status:'active' },
+  { id:'cl_concrete',   name:'Concrete',    logo:'', status:'active' },
+  { id:'cl_hor',        name:'HÖR',         logo:'', status:'active' },
+  { id:'cl_boilerroom', name:'Boiler Room', logo:'', status:'active' }
+];
+function loadClients(){
+  try{ const v = JSON.parse(localStorage.getItem(LS.clients)); if(Array.isArray(v)&&v.length) return v; }catch{}
+  const seed = JSON.parse(JSON.stringify(SEED_CLIENTS));
+  localStorage.setItem(LS.clients, JSON.stringify(seed));
+  return seed;
+}
+function saveClients(c){
+  localStorage.setItem(LS.clients, JSON.stringify(c));
+  if(typeof dataChan !== 'undefined' && dataChan) dataChan.postMessage({type:'clients', at:Date.now()});
+}
+
+let state = {
+  artists: loadArtists(),
+  users: loadUsers(),
+  subs: loadSubs(),
+  clients: loadClients(),
+  visitors: tsVisitors(),
+  signups: tsSignups(),
+  sel: { artists:new Set(), users:new Set() }
+};
+
+/* ===== auth ===== */
+function isAuthed(){ return localStorage.getItem(LS.auth)==='1'; }
+function setAuthed(v, email){
+  if(v){ localStorage.setItem(LS.auth,'1'); if(email) localStorage.setItem(LS.auth+':email', email); }
+  else { localStorage.removeItem(LS.auth); }
+  applyAuth();
+}
+function applyAuth(){
+  const ok = isAuthed();
+  document.getElementById('loginScreen').classList.toggle('hidden', ok);
+  document.getElementById('shell').classList.toggle('hidden', !ok);
+  if(ok){
+    const em = localStorage.getItem(LS.auth+':email') || 'admin@pulse.io';
+    document.getElementById('adminEmail').textContent = em;
+    if(!location.hash) location.hash = '#overview';
+    render();
+  }
+}
+document.getElementById('loginForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const em = document.getElementById('loginEmail').value.trim();
+  setAuthed(true, em);
+  toast('Welcome back, '+em, '✓');
+});
+document.getElementById('logoutBtn').addEventListener('click', () => { setAuthed(false); toast('Signed out','↩'); });
+
+/* ===== routing ===== */
+const ROUTES = ['overview','artists','users','analytics','imports','subscriptions','clients','applications','activity','settings'];
+function setActive(r){
+  document.querySelectorAll('#nav .nav-item').forEach(a => a.classList.toggle('active', a.getAttribute('data-route')===r));
+  const titles = { overview:'Overview', artists:'Artists', users:'Users', analytics:'Analytics', imports:'Import / Export', subscriptions:'Subscriptions', clients:'Clients & partners', applications:'Applications', activity:'Live activity', settings:'Settings' };
+  document.getElementById('pageTitle').textContent = titles[r] || 'Overview';
+}
+function render(){
+  if(!isAuthed()) return;
+  const r = (location.hash.replace(/^#/,'') || 'overview').split('?')[0];
+  const route = ROUTES.includes(r) ? r : 'overview';
+  setActive(route);
+  const fns = { overview:rOverview, artists:rArtists, users:rUsers, analytics:rAnalytics, imports:rImports, subscriptions:rSubs, clients:rClients, applications:rApps, activity:rActivity, settings:rSettings };
+  const page = document.getElementById('page');
+  page.innerHTML = fns[route]();
+  page.classList.remove('pf'); void page.offsetWidth; page.classList.add('pf');
+  const after = { overview:aOverview, artists:aArtists, users:aUsers, analytics:aAnalytics, imports:aImports, subscriptions:aSubs, clients:aClients, applications:aApps, activity:aActivity, settings:aSettings }[route];
+  if(after) after();
+  // Refresh applications badge each render
+  const pending = state.artists.filter(a => a.status==='pending').length;
+  const badge = document.getElementById('appsBadge');
+  if(badge){
+    if(pending>0){ badge.textContent = pending; badge.classList.remove('hidden'); }
+    else badge.classList.add('hidden');
+  }
+}
+window.addEventListener('hashchange', render);
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-route]');
+  if(!a) return;
+  e.preventDefault();
+  location.hash = '#' + a.getAttribute('data-route');
+});
+
+/* ===== util ===== */
+const fmt = (n) => new Intl.NumberFormat('en-US').format(n);
+const fmtPct = (n) => (n>0?'+':'') + n.toFixed(1) + '%';
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+function toast(msg, icon='✓'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+/* ===== drawer ===== */
+const drawer = document.getElementById('drawer');
+const drawerBackdrop = document.getElementById('drawerBackdrop');
+function openDrawer(title, body){
+  document.getElementById('drawerTitle').textContent = title;
+  document.getElementById('drawerBody').innerHTML = body;
+  drawer.classList.add('open');
+  drawerBackdrop.classList.add('open');
+}
+function closeDrawer(){ drawer.classList.remove('open'); drawerBackdrop.classList.remove('open'); }
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+drawerBackdrop.addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
+
+/* live count flicker */
+setInterval(() => {
+  const el = document.getElementById('liveCount');
+  if(!el) return;
+  const cur = +el.textContent || 42;
+  const next = Math.max(20, cur + (Math.random()<0.5?-1:1) * Math.floor(Math.random()*3));
+  el.textContent = next;
+}, 3500);
+
+/* ===== charts helper ===== */
+const charts = {};
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+
+/* ===========================================================
+ * OVERVIEW
+ * =========================================================== */
+function rOverview(){
+  const totals = computeTotals();
+  return `
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+    ${statCard('Total artists',     fmt(totals.artists),    '+3 this week',    'pill-violet','▲', 'M3 12h4l3-8 4 16 3-8h4')}
+    ${statCard('Registered users',  fmt(totals.users),      '+12 this week',   'pill-cyan','▲',   'M3 12h4l3-8 4 16 3-8h4')}
+    ${statCard('Visitors (7d)',     fmt(totals.visitors7),  fmtPct(totals.visitorsDelta), 'pill-lime', totals.visitorsDelta>=0?'▲':'▼', 'M3 12h4l3-8 4 16 3-8h4')}
+    ${statCard('Avg. time on site', '4m 12s',               '+8.4%',           'pill-amber','▲', 'M3 12h4l3-8 4 16 3-8h4')}
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-3 mb-6">
+    <div class="card p-5 lg:col-span-2">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h3 class="font-semibold">Traffic & sign-ups</h3>
+          <p class="text-xs text-fg-3">Last 30 days</p>
+        </div>
+        <div class="flex gap-2 text-xs">
+          <span class="pill pill-muted"><span class="w-2 h-2 rounded-sm bg-neon-violet"></span>Visitors</span>
+          <span class="pill pill-muted"><span class="w-2 h-2 rounded-sm bg-neon-cyan"></span>Sign-ups</span>
+        </div>
+      </div>
+      <div class="h-[260px] relative"><canvas id="chTraffic"></canvas></div>
+    </div>
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h3 class="font-semibold">Traffic sources</h3>
+          <p class="text-xs text-fg-3">Last 7 days</p>
+        </div>
+      </div>
+      <div class="h-[230px] relative"><canvas id="chSources"></canvas></div>
+      <ul class="mt-3 text-xs space-y-1.5 text-fg-1">
+        <li class="flex justify-between"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-sm bg-neon-violet"></span>Direct</span><span class="text-fg-2">42%</span></li>
+        <li class="flex justify-between"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-sm bg-neon-cyan"></span>Social</span><span class="text-fg-2">31%</span></li>
+        <li class="flex justify-between"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-sm bg-neon-lime"></span>Referral</span><span class="text-fg-2">19%</span></li>
+        <li class="flex justify-between"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-sm bg-neon-amber"></span>Search</span><span class="text-fg-2">8%</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h3 class="font-semibold">Most viewed artists</h3>
+          <p class="text-xs text-fg-3">Profile views, last 30d</p>
+        </div>
+        <a class="text-xs text-fg-2 hover:text-fg-0 underline-offset-4 hover:underline" data-route="artists">View all →</a>
+      </div>
+      <div class="h-[260px] relative"><canvas id="chTopArtists"></canvas></div>
+    </div>
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h3 class="font-semibold">Recent activity</h3>
+          <p class="text-xs text-fg-3">Live · auto-updating</p>
+        </div>
+        <span class="pill pill-lime"><span class="live-dot"></span>Live</span>
+      </div>
+      <ul id="activityList" class="space-y-2.5 text-sm">${renderActivity()}</ul>
+    </div>
+  </div>`;
+}
+
+function statCard(label,value,delta,pill,arrow,sparkPath){
+  const up = !delta.startsWith('-');
+  return `
+  <div class="stat-card">
+    <p class="text-xs text-fg-2">${label}</p>
+    <div class="mt-1 flex items-end justify-between">
+      <p class="text-2xl font-bold tracking-tight">${value}</p>
+      <span class="pill ${pill}">${arrow} ${escapeHtml(delta)}</span>
+    </div>
+    <svg class="absolute right-0 bottom-0 w-28 h-12 opacity-50" viewBox="0 0 100 30" fill="none">
+      <defs><linearGradient id="sp${pill}" x1="0" x2="1"><stop offset="0%" stop-color="#9d4bff"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient></defs>
+      <path d="M0 25 Q15 10 25 18 T50 12 T75 16 T100 6" fill="none" stroke="url(#sp${pill})" stroke-width="1.4"/>
+    </svg>
+  </div>`;
+}
+
+function computeTotals(){
+  const last7 = state.visitors.slice(-7).reduce((s,x)=>s+x.value,0);
+  const prev7 = state.visitors.slice(-14,-7).reduce((s,x)=>s+x.value,0);
+  const delta = prev7? ((last7-prev7)/prev7)*100 : 0;
+  return { artists: state.artists.length, users: state.users.length, visitors7: last7, visitorsDelta: delta };
+}
+
+function renderActivity(){
+  const events = [
+    { who:'Lina K.', what:'viewed', target:'Kaer Vex', when:'2m ago', icon:'👁', color:'pill-violet' },
+    { who:'noah@example.com', what:'signed up', target:'(new user)', when:'4m ago', icon:'★', color:'pill-cyan' },
+    { who:'Adrian', what:'sent enquiry to', target:'Vexorra', when:'8m ago', icon:'✉', color:'pill-lime' },
+    { who:'Yuki', what:'saved', target:'Lunaïre', when:'14m ago', icon:'♥', color:'pill-rose' },
+    { who:'Marcus', what:'viewed', target:'Tessera', when:'19m ago', icon:'👁', color:'pill-violet' },
+    { who:'Sofia', what:'updated profile', target:'Ostari', when:'32m ago', icon:'✎', color:'pill-amber' },
+    { who:'Daniel', what:'viewed', target:'Rytm Gang', when:'48m ago', icon:'👁', color:'pill-violet' }
+  ];
+  return events.map(e => `
+    <li class="flex items-start gap-3">
+      <span class="grid place-items-center h-7 w-7 rounded-lg ${e.color.replace('pill-','bg-neon-')+'/15'} text-sm">${e.icon}</span>
+      <div class="flex-1 min-w-0">
+        <p class="leading-tight"><span class="font-medium">${escapeHtml(e.who)}</span> <span class="text-fg-2">${e.what}</span> <span class="font-medium">${escapeHtml(e.target)}</span></p>
+        <p class="text-xs text-fg-3">${e.when}</p>
+      </div>
+    </li>`).join('');
+}
+
+function aOverview(){
+  // Traffic & signups line chart
+  destroyChart('chTraffic'); destroyChart('chSources'); destroyChart('chTopArtists');
+  const ctx = document.getElementById('chTraffic').getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,260);
+  grad.addColorStop(0,'rgba(157,75,255,.45)'); grad.addColorStop(1,'rgba(157,75,255,0)');
+  charts.chTraffic = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: state.visitors.map(v=>v.date.slice(5)),
+      datasets:[
+        { label:'Visitors', data: state.visitors.map(v=>v.value), borderColor:'#9d4bff', backgroundColor:grad, fill:true, tension:.35, pointRadius:0, pointHoverRadius:5, borderWidth:2 },
+        { label:'Sign-ups', data: state.signups.map(v=>v.value*30), borderColor:'#22d3ee', backgroundColor:'rgba(34,211,238,.05)', fill:false, tension:.35, pointRadius:0, pointHoverRadius:5, borderWidth:2, borderDash:[4,4] }
+      ]
+    },
+    options: chartOpts({yTickCallback:(v)=>v>=1000?(v/1000).toFixed(1)+'k':v})
+  });
+  // Sources doughnut
+  const ctx2 = document.getElementById('chSources').getContext('2d');
+  charts.chSources = new Chart(ctx2, {
+    type:'doughnut',
+    data:{ labels:['Direct','Social','Referral','Search'], datasets:[{data:[42,31,19,8], backgroundColor:['#9d4bff','#22d3ee','#a3ff12','#f59e0b'], borderWidth:0, hoverOffset:8}] },
+    options:{ plugins:{legend:{display:false}, tooltip:tooltipStyle()}, cutout:'70%' }
+  });
+  // Top artists bar
+  const ctx3 = document.getElementById('chTopArtists').getContext('2d');
+  const top = [...state.artists].sort((a,b)=>b.views-a.views).slice(0,6);
+  charts.chTopArtists = new Chart(ctx3, {
+    type:'bar',
+    data:{ labels: top.map(a=>a.name), datasets:[{ data: top.map(a=>a.views), backgroundColor: top.map((_,i)=>i===0?'#9d4bff': i===1?'#7c3aed':'#3b82f6'), borderRadius:8, barPercentage:.6 }] },
+    options:{ ...chartOpts({yTickCallback:v=>v>=1000?(v/1000).toFixed(1)+'k':v}), indexAxis:'x', plugins:{legend:{display:false}, tooltip:tooltipStyle()} }
+  });
+}
+
+function chartOpts({yTickCallback}={}){
+  return {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:tooltipStyle() },
+    interaction:{intersect:false, mode:'index'},
+    scales:{
+      x:{ grid:{color:'rgba(255,255,255,.04)', drawBorder:false}, ticks:{color:'#6b6b78', font:{size:10}, maxRotation:0, autoSkipPadding:14} },
+      y:{ grid:{color:'rgba(255,255,255,.04)', drawBorder:false}, ticks:{color:'#6b6b78', font:{size:10}, callback: yTickCallback || ((v)=>v) }, beginAtZero:true }
+    }
+  };
+}
+function tooltipStyle(){
+  return { backgroundColor:'#15151c', titleColor:'#f8f8fa', bodyColor:'#cfcfd6', borderColor:'#23232c', borderWidth:1, padding:10, displayColors:true, boxPadding:4, cornerRadius:8, titleFont:{size:11}, bodyFont:{size:11} };
+}
+
+/* ===========================================================
+ * ARTISTS CMS
+ * =========================================================== */
+function rArtists(){
+  const genres = [...new Set(state.artists.flatMap(a=>a.genres))].sort();
+  return `
+  <div class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center">
+    <div class="relative flex-1 max-w-md">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-fg-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="aSearch" class="input pl-9" placeholder="Search artists by name, city…"/>
+    </div>
+    <select id="aGenre" class="input max-w-[200px]"><option value="">All genres</option>${genres.map(g=>`<option>${g}</option>`).join('')}</select>
+    <select id="aStatus" class="input max-w-[160px]"><option value="">All statuses</option><option value="active">Active</option><option value="draft">Draft</option></select>
+    <div class="flex-1"></div>
+    <button id="bulkDelete" class="btn btn-danger hidden">Delete selected (<span id="bulkCount">0</span>)</button>
+    <button id="exportArtists" class="btn btn-secondary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+    <button id="importArtists" class="btn btn-secondary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import</button>
+    <button id="addArtist" class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add artist</button>
+  </div>
+
+  <div class="card overflow-hidden">
+    <div class="overflow-auto" style="max-height: calc(100vh - 220px)">
+      <table class="t" id="aTable">
+        <thead>
+          <tr>
+            <th style="width:36px"><input type="checkbox" id="aSelectAll"/></th>
+            <th>Artist</th>
+            <th>Genres</th>
+            <th>Location</th>
+            <th>Socials</th>
+            <th class="text-right">Views</th>
+            <th class="text-right">Popularity</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="aBody"></tbody>
+      </table>
+    </div>
+    <div id="aMeta" class="px-4 py-3 text-xs text-fg-3 border-t border-line"></div>
+  </div>`;
+}
+
+function aArtists(){
+  const search = document.getElementById('aSearch');
+  const genre = document.getElementById('aGenre');
+  const stat = document.getElementById('aStatus');
+  const bulkBtn = document.getElementById('bulkDelete');
+  const bulkCount = document.getElementById('bulkCount');
+  const selectAll = document.getElementById('aSelectAll');
+  state.sel.artists = new Set();
+
+  function getFiltered(){
+    const q = (search.value||'').toLowerCase().trim();
+    const g = genre.value;
+    const s = stat.value;
+    return state.artists.filter(a => {
+      if(g && !a.genres.includes(g)) return false;
+      if(s && a.status !== s) return false;
+      if(q){
+        const hay = `${a.name} ${a.city} ${a.country} ${a.email} ${a.genres.join(' ')}`.toLowerCase();
+        if(!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function row(a){
+    const socials = ['website','instagram','soundcloud','appleMusic','facebook','spotify','youtube','twitter']
+      .filter(k => a.social && a.social[k])
+      .slice(0,5);
+    const dotMap = { website:'#9a9aa8', instagram:'#E1306C', soundcloud:'#FF5500', appleMusic:'#fa57c1', facebook:'#1877F2', spotify:'#1DB954', youtube:'#FF0000', twitter:'#1da1f2' };
+    return `
+    <tr data-id="${a.id}">
+      <td><input type="checkbox" class="rowsel" data-id="${a.id}"/></td>
+      <td>
+        <div class="flex items-center gap-3">
+          <img src="${a.profileImage}" alt="" class="h-9 w-9 rounded-lg object-cover"/>
+          <div>
+            <p class="font-medium leading-tight flex items-center gap-1.5">${escapeHtml(a.name)} ${a.verified?'<svg width="12" height="12" viewBox="0 0 24 24" fill="#22d3ee"><path d="M9 12l2 2 4-4-1.4-1.4L11 11.2l-.6-.6z M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>':''} ${a.featured?'<span title="Featured on homepage" class="text-[10px]" style="color:#FFB597">★ Featured</span>':''}</p>
+            <p class="text-xs text-fg-3">${a.email}</p>
+          </div>
+        </div>
+      </td>
+      <td><div class="flex flex-wrap gap-1">${a.genres.map(g=>`<span class="pill pill-muted">${escapeHtml(g)}</span>`).join('')}</div></td>
+      <td class="text-fg-1">${escapeHtml(a.city)}, <span class="text-fg-3">${escapeHtml(a.country)}</span></td>
+      <td><div class="flex gap-1">${socials.map(s=>`<span data-tip="${s}" class="h-2 w-2 rounded-full" style="background:${dotMap[s]}"></span>`).join('')||'<span class="text-fg-3 text-xs">—</span>'}</div></td>
+      <td class="text-right tabular-nums">${fmt(a.views)}</td>
+      <td class="text-right">
+        <div class="inline-flex items-center gap-2">
+          <div class="w-16 h-1.5 rounded-full bg-bg-3 overflow-hidden"><div class="h-full bg-gradient-to-r from-neon-violet to-neon-cyan" style="width:${a.popularity}%"></div></div>
+          <span class="text-fg-2 text-xs">${a.popularity}</span>
+        </div>
+      </td>
+      <td>${a.status==='active'?'<span class="pill pill-lime">● Active</span>':'<span class="pill pill-amber">● Draft</span>'}</td>
+      <td class="text-right">
+        <button class="btn-icon edit" data-id="${a.id}" data-tip="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn-icon del" data-id="${a.id}" data-tip="Delete" style="color:#fb7185"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </td>
+    </tr>`;
+  }
+
+  function renderRows(){
+    const list = getFiltered();
+    document.getElementById('aBody').innerHTML = list.map(row).join('');
+    document.getElementById('aMeta').textContent = `${list.length} of ${state.artists.length} artists`;
+    document.querySelectorAll('.rowsel').forEach(cb => cb.addEventListener('change', () => {
+      const id = cb.getAttribute('data-id');
+      if(cb.checked) state.sel.artists.add(id); else state.sel.artists.delete(id);
+      bulkCount.textContent = state.sel.artists.size;
+      bulkBtn.classList.toggle('hidden', state.sel.artists.size===0);
+    }));
+    document.querySelectorAll('.edit').forEach(b => b.addEventListener('click', () => editArtist(b.getAttribute('data-id'))));
+    document.querySelectorAll('.del').forEach(b => b.addEventListener('click', () => deleteArtist(b.getAttribute('data-id'))));
+  }
+
+  search.addEventListener('input', renderRows);
+  genre.addEventListener('change', renderRows);
+  stat.addEventListener('change', renderRows);
+  selectAll.addEventListener('change', () => {
+    document.querySelectorAll('.rowsel').forEach(cb => { cb.checked = selectAll.checked; cb.dispatchEvent(new Event('change')); });
+  });
+  bulkBtn.addEventListener('click', () => {
+    if(!confirm(`Delete ${state.sel.artists.size} artist(s)?`)) return;
+    state.artists = state.artists.filter(a => !state.sel.artists.has(a.id));
+    saveArtists(state.artists);
+    state.sel.artists.clear();
+    bulkBtn.classList.add('hidden');
+    renderRows();
+    toast('Deleted','✓');
+  });
+  document.getElementById('addArtist').addEventListener('click', () => editArtist(null));
+  document.getElementById('exportArtists').addEventListener('click', () => exportCSV('artists.csv', toArtistCSV(state.artists)));
+  document.getElementById('importArtists').addEventListener('click', () => location.hash='#imports');
+
+  renderRows();
+}
+
+function deleteArtist(id){
+  const a = state.artists.find(x=>x.id===id);
+  if(!a) return;
+  if(!confirm(`Delete "${a.name}"?`)) return;
+  state.artists = state.artists.filter(x=>x.id!==id);
+  saveArtists(state.artists);
+  render(); toast(`Deleted ${a.name}`,'✓');
+}
+
+/* ===== Artist edit drawer ===== */
+const VIS_KEYS = ['name','image','bio','social','events','country','rate'];
+function defaultVis(){ return Object.fromEntries(VIS_KEYS.map(k=>[k,true])); }
+function visBtn(key, current){
+  const on = current !== false; // default visible
+  return `<button type="button" class="vis-toggle ${on?'on':'off'}" data-vis="${key}" data-on="${on?'1':'0'}" title="Toggle visibility on the public profile">
+    ${on
+      ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Visible'
+      : '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>Hidden'
+    }
+  </button>`;
+}
+function fieldHead(label, key, vis){
+  return `<div class="field-row"><label class="label">${label}</label>${visBtn(key, vis?.[key])}</div>`;
+}
+
+function editArtist(id){
+  const isNew = !id;
+  const a = isNew ? {
+    id:'a'+Math.random().toString(36).slice(2,7), name:'', slug:'', genres:[], city:'', country:'',
+    profileImage:'', email:'', popularity:50, verified:false, views:0, clicks:0, status:'draft',
+    rate:'', visible: defaultVis(),
+    social:{website:'',instagram:'',soundcloud:'',appleMusic:'',facebook:'',spotify:'',youtube:'',twitter:''}
+  } : { ...state.artists.find(x=>x.id===id) };
+  if(!isNew){ a.social = a.social || {}; a.visible = { ...defaultVis(), ...(a.visible||{}) }; }
+
+  const eventsCount = (a.events||[]).length;
+
+  const body = `
+  <form id="artistForm" class="space-y-5">
+    <div class="rounded-xl border border-line bg-bg-1 px-4 py-3 text-xs text-fg-2 flex items-center gap-3">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span class="flex-1">Click any <span class="vis-toggle on" style="padding:.05rem .35rem;font-size:.55rem;cursor:default;pointer-events:none">Visible</span> chip to hide a field on the public profile.</span>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4 items-start">
+      <div class="col-span-1">
+        ${fieldHead('Profile image', 'image', a.visible)}
+        <label id="afImgDrop" class="card overflow-hidden block cursor-pointer hover:border-bg-3 transition-colors">
+          <div class="aspect-square bg-bg-2 grid place-items-center relative">
+            <img id="afImg" src="${a.profileImage||''}" alt="" class="h-full w-full object-cover ${a.profileImage?'':'hidden'}"/>
+            <div id="afImgPlaceholder" class="text-fg-3 text-xs text-center px-3 ${a.profileImage?'hidden':''}">
+              <svg class="mx-auto mb-2" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p class="text-fg-1 font-medium">Click or drag to upload</p>
+              <p class="text-fg-3">PNG/JPG/WebP · 3 MB max</p>
+            </div>
+            <span id="afImgOverlay" class="absolute inset-x-0 bottom-0 bg-bg-0/80 text-fg-1 text-[10px] uppercase tracking-widest text-center py-1.5 ${a.profileImage?'':'hidden'}">Click to replace</span>
+          </div>
+          <input type="file" id="afImgFile" accept="image/png,image/jpeg,image/webp,image/*" class="hidden"/>
+        </label>
+        <div class="mt-2 flex items-center gap-2 text-xs">
+          <button type="button" id="afImgRemove" class="text-fg-3 hover:text-fg-1 underline-offset-4 hover:underline ${a.profileImage?'':'hidden'}">Remove</button>
+          <span class="flex-1"></span>
+          <button type="button" id="afImgUseUrl" class="text-fg-3 hover:text-fg-1 underline-offset-4 hover:underline">Use URL instead</button>
+        </div>
+        <input class="input mt-2 hidden" id="afImgUrl" placeholder="https://..." value="${escapeHtml(a.profileImage&&!a.profileImage.startsWith('data:')?a.profileImage:'')}"/>
+        <p class="text-xs text-fg-3 mt-1">Production: upload directly to Cloudinary/S3.</p>
+      </div>
+      <div class="col-span-2 grid grid-cols-2 gap-3">
+        <div class="col-span-2">
+          ${fieldHead('Artist name', 'name', a.visible)}
+          <input class="input" id="afName" required value="${escapeHtml(a.name)}"/>
+        </div>
+        <div><label class="label">Slug</label><input class="input" id="afSlug" value="${escapeHtml(a.slug)}" placeholder="auto-from-name"/></div>
+        <div><label class="label">Status</label>
+          <select class="input" id="afStatus">
+            <option value="active" ${a.status==='active'?'selected':''}>Active</option>
+            <option value="draft" ${a.status!=='active'?'selected':''}>Draft</option>
+          </select>
+        </div>
+        <div class="col-span-2"><label class="label">Genres (comma separated)</label><input class="input" id="afGenres" value="${escapeHtml((a.genres||[]).join(', '))}" placeholder="Industrial, Hard Techno"/></div>
+        <div><label class="label">City</label><input class="input" id="afCity" value="${escapeHtml(a.city)}"/></div>
+        <div>
+          ${fieldHead('Country', 'country', a.visible)}
+          <input class="input" id="afCountry" value="${escapeHtml(a.country)}"/>
+        </div>
+        <div><label class="label">Booking email <span class="text-fg-3 normal-case">(internal)</span></label><input class="input" id="afEmail" type="email" value="${escapeHtml(a.email)}"/></div>
+        <div>
+          ${fieldHead('Booking range / fee', 'rate', a.visible)}
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-fg-1 font-semibold pointer-events-none select-none">€</span>
+            <input class="input pl-7" id="afRate" value="${escapeHtml(a.rate||'')}" placeholder="800 — 1,200"/>
+          </div>
+        </div>
+        <div><label class="label">Popularity (0–100)</label><input class="input" id="afPop" type="number" min="0" max="100" value="${a.popularity}"/></div>
+        <div class="flex items-end gap-4 flex-wrap">
+          <label class="flex items-center gap-2 text-sm text-fg-1"><input type="checkbox" id="afVerified" ${a.verified?'checked':''} class="accent-neon-violet"/> Verified</label>
+          <label class="flex items-center gap-2 text-sm text-fg-1" title="Show this artist in the homepage hero rotation (cycles every 5s)"><input type="checkbox" id="afFeatured" ${a.featured?'checked':''} class="accent-neon-violet"/> Featured on homepage</label>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      ${fieldHead('Bio / description', 'bio', a.visible)}
+      <textarea class="input" id="afBio" rows="4" placeholder="Short artist bio…">${escapeHtml(a.bio||'')}</textarea>
+    </div>
+
+    <div>
+      <label class="label">Music embed URL <span class="text-fg-3 normal-case">(SoundCloud or Mixcloud track / playlist)</span></label>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-fg-3"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 14v4h1v-4H3zm2-2v6h1v-6H5zm2-1v7h1v-7H7zm2 0v7h1v-7H9zm2-1v8h1v-8h-1zm2-1v9h1v-9h-1zm2-1v10h1v-10h-1zm2 1v9h1v-9h-1zm2 .5c-.5 0-1 .1-1.4.3 0 .1 0 .2-.1.3v8.4c.5.3 1 .5 1.5.5 1.7 0 3-1.3 3-3 0-1.6-1.3-3-3-3z"/></svg></span>
+        <input class="input pl-10" id="afMusic" value="${escapeHtml(a.musicEmbed||'')}" placeholder="https://soundcloud.com/artist/track-name"/>
+      </div>
+      <p class="text-xs text-fg-3 mt-1">Paste the full URL of a SoundCloud track or playlist. Becomes the embedded player on the public profile's "Listen" section.</p>
+    </div>
+
+    <div>
+      <div class="field-row mb-3 mt-2"><h4 class="font-semibold m-0">Artist Socials</h4>${visBtn('social', a.visible?.social)}</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        ${socialField('website','Website','globe', a.social?.website)}
+        ${socialField('instagram','Instagram','instagram', a.social?.instagram)}
+        ${socialField('soundcloud','Soundcloud','soundcloud', a.social?.soundcloud)}
+        ${socialField('appleMusic','Apple Music','apple', a.social?.appleMusic)}
+        ${socialField('facebook','Facebook','facebook', a.social?.facebook)}
+        ${socialField('spotify','Spotify','spotify', a.social?.spotify)}
+        ${socialField('youtube','Youtube','youtube', a.social?.youtube)}
+        ${socialField('twitter','X (Twitter)','x', a.social?.twitter)}
+      </div>
+    </div>
+
+    <div>
+      <div class="field-row mb-3 mt-2"><h4 class="font-semibold m-0">Events</h4>${visBtn('events', a.visible?.events)}</div>
+      <div class="rounded-xl border border-line bg-bg-1 p-4 text-sm text-fg-2">
+        ${eventsCount>0
+          ? `${eventsCount} event(s) scheduled. <span class="text-fg-3">Edit individual events from the artist's events panel (in production).</span>`
+          : `<span class="text-fg-3">No events yet.</span>`}
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between gap-3 pt-3 border-t border-line">
+      <div class="text-xs text-fg-3">Auto-syncs to public artist profile on save</div>
+      <div class="flex gap-2">
+        <button type="button" id="afCancel" class="btn btn-secondary">Cancel</button>
+        <button type="submit" class="btn btn-primary">${isNew?'Create artist':'Save changes'}</button>
+      </div>
+    </div>
+  </form>`;
+
+  openDrawer(isNew?'Add artist':`Edit ${a.name}`, body);
+
+  // wire
+  const f = document.getElementById('artistForm');
+  document.getElementById('afCancel').addEventListener('click', closeDrawer);
+
+  // ---- Profile image: file upload + optional URL fallback ----
+  const imgEl    = document.getElementById('afImg');
+  const phEl     = document.getElementById('afImgPlaceholder');
+  const ovEl     = document.getElementById('afImgOverlay');
+  const dropEl   = document.getElementById('afImgDrop');
+  const fileEl   = document.getElementById('afImgFile');
+  const urlEl    = document.getElementById('afImgUrl');
+  const useUrlBtn= document.getElementById('afImgUseUrl');
+  const rmBtn    = document.getElementById('afImgRemove');
+
+  function setImgSrc(src){
+    if(src){
+      imgEl.src = src;
+      imgEl.classList.remove('hidden');
+      phEl.classList.add('hidden');
+      ovEl.classList.remove('hidden');
+      rmBtn.classList.remove('hidden');
+    } else {
+      imgEl.removeAttribute('src');
+      imgEl.classList.add('hidden');
+      phEl.classList.remove('hidden');
+      ovEl.classList.add('hidden');
+      rmBtn.classList.add('hidden');
+    }
+  }
+  function readFile(file){
+    if(!file) return;
+    if(!file.type.startsWith('image/')) return alert('Please choose an image file (PNG, JPG, WebP).');
+    if(file.size > 3 * 1024 * 1024)    return alert('Image too large — keep it under 3 MB.');
+    const r = new FileReader();
+    r.onload = () => { setImgSrc(r.result); urlEl.value = r.result; };
+    r.onerror = () => alert('Could not read that file.');
+    r.readAsDataURL(file);
+  }
+  fileEl.addEventListener('change', e => readFile(e.target.files && e.target.files[0]));
+  ['dragover','dragenter'].forEach(ev => dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.add('border-neon-violet/50'); }));
+  ['dragleave','dragend','drop'].forEach(ev => dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.remove('border-neon-violet/50'); }));
+  dropEl.addEventListener('drop', e => { const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if(f) readFile(f); });
+  rmBtn.addEventListener('click', () => { setImgSrc(''); urlEl.value=''; fileEl.value=''; });
+  useUrlBtn.addEventListener('click', () => {
+    urlEl.classList.toggle('hidden');
+    if(!urlEl.classList.contains('hidden')) urlEl.focus();
+  });
+  urlEl.addEventListener('input', e => setImgSrc(e.target.value));
+
+  // Wire visibility toggles
+  document.querySelectorAll('[data-vis]').forEach(btn => btn.addEventListener('click', () => {
+    const isOn = btn.getAttribute('data-on') === '1';
+    const nextOn = !isOn;
+    btn.setAttribute('data-on', nextOn ? '1' : '0');
+    btn.classList.toggle('on', nextOn);
+    btn.classList.toggle('off', !nextOn);
+    btn.innerHTML = nextOn
+      ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Visible'
+      : '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>Hidden';
+  }));
+  function readVis(){
+    const out = defaultVis();
+    document.querySelectorAll('[data-vis]').forEach(b => { out[b.getAttribute('data-vis')] = b.getAttribute('data-on') === '1'; });
+    return out;
+  }
+
+  f.addEventListener('submit', e => {
+    e.preventDefault();
+    const next = {
+      ...a,
+      name: document.getElementById('afName').value.trim(),
+      slug: document.getElementById('afSlug').value.trim() || slugify(document.getElementById('afName').value),
+      status: document.getElementById('afStatus').value,
+      genres: document.getElementById('afGenres').value.split(',').map(s=>s.trim()).filter(Boolean),
+      city: document.getElementById('afCity').value.trim(),
+      country: document.getElementById('afCountry').value.trim(),
+      email: document.getElementById('afEmail').value.trim(),
+      rate: document.getElementById('afRate').value.trim(),
+      popularity: +document.getElementById('afPop').value || 0,
+      verified: document.getElementById('afVerified').checked,
+      featured: document.getElementById('afFeatured').checked,
+      bio: document.getElementById('afBio').value.trim(),
+      musicEmbed: document.getElementById('afMusic').value.trim(),
+      profileImage: document.getElementById('afImgUrl').value.trim(),
+      visible: readVis(),
+      social: {
+        website: gv('soc-website'), instagram: gv('soc-instagram'),
+        soundcloud: gv('soc-soundcloud'), appleMusic: gv('soc-appleMusic'),
+        facebook: gv('soc-facebook'), spotify: gv('soc-spotify'),
+        youtube: gv('soc-youtube'), twitter: gv('soc-twitter')
+      }
+    };
+    if(isNew){
+      next.views = 0; next.clicks = 0; next.createdAt = new Date().toISOString().slice(0,10);
+      state.artists.unshift(next);
+    } else {
+      const i = state.artists.findIndex(x=>x.id===id);
+      state.artists[i] = next;
+    }
+    saveArtists(state.artists);
+    closeDrawer();
+    render();
+    toast(isNew?'Artist created':'Artist updated','✓');
+  });
+}
+function gv(id){ const e=document.getElementById(id); return e? e.value.trim() : ''; }
+function slugify(s){ return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+
+function socialField(key, label, iconKey, value){
+  return `
+  <div class="rounded-xl border border-line bg-bg-1 hover:border-bg-3 transition-colors px-3 py-2 flex items-center gap-3">
+    <span class="grid h-7 w-7 place-items-center rounded-md bg-bg-2 text-fg-2">${socialIcon(iconKey)}</span>
+    <div class="flex-1 min-w-0">
+      <p class="text-xs text-fg-2 leading-tight">${label}</p>
+      <input id="soc-${key}" class="w-full bg-transparent text-sm focus:outline-none placeholder:text-fg-3 mt-0.5" placeholder="https://${key==='twitter'?'x.com/':key==='website'?'yourdomain.com':key+'.com/'}…" value="${escapeHtml(value||'')}"/>
+    </div>
+  </div>`;
+}
+function socialIcon(k){
+  const sw = (path) => `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${path}</svg>`;
+  switch(k){
+    case 'globe': return sw(`<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`);
+    case 'instagram': return sw(`<rect x="3" y="3" width="18" height="18" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>`);
+    case 'soundcloud': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 14v4h1v-4H3zm2-2v6h1v-6H5zm2-1v7h1v-7H7zm2 0v7h1v-7H9zm2-1v8h1v-8h-1zm2-1v9h1v-9h-1zm2-1v10h1v-10h-1zm2 1v9h1v-9h-1zm2 .5c-.5 0-1 .1-1.4.3 0 .1 0 .2-.1.3v8.4c.5.3 1 .5 1.5.5 1.7 0 3-1.3 3-3 0-1.6-1.3-3-3-3z"/></svg>`;
+    case 'apple': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5.4c-.7.9-1.7 1.4-2.8 1.3-.1-1.1.4-2.1 1-2.8.7-.8 1.7-1.4 2.6-1.5.1 1 0 2.1-.8 3zM21 17.5c-.5 1.3-.8 1.8-1.5 2.9-1 1.6-2.4 3.6-4.1 3.6-1.6 0-2-.9-4.2-.9-2.2 0-2.6.9-4.2.9-1.7 0-3.1-1.8-4.1-3.4-2.7-4.6-3-10-1.3-12.9 1.2-2 3.1-3.2 4.9-3.2 1.8 0 3 1 4.5 1 1.5 0 2.4-1 4.5-1 1.6 0 3.2.9 4.4 2.4-3.9 2.1-3.2 7.7.5 9.3z"/></svg>`;
+    case 'facebook': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12c0-5.5-4.5-10-10-10S2 6.5 2 12c0 5 3.7 9.1 8.4 9.9V14.9H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v6.9c4.7-.7 8.4-4.8 8.4-9.8z"/></svg>`;
+    case 'spotify': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.5 14.4c-.2.3-.5.4-.8.2-2.3-1.4-5.2-1.7-8.5-.9-.4.1-.7-.1-.8-.5s.1-.7.5-.8c3.7-.8 6.9-.5 9.5 1.1.3.2.4.6.1.9zm1.2-2.6c-.2.4-.7.5-1 .3-2.6-1.6-6.6-2.1-9.6-1.1-.4.1-.9-.1-1-.5-.1-.4.1-.9.5-1 3.5-1 7.9-.5 10.9 1.3.4.2.5.6.2 1zm.1-2.7c-3.1-1.9-8.4-2-11.4-1.1-.5.2-1.1-.1-1.2-.6-.2-.5.1-1.1.6-1.2 3.5-1 9.3-.9 13 1.3.5.3.6.9.3 1.4-.3.4-.9.5-1.3.2z"/></svg>`;
+    case 'youtube': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7.4s-.2-1.6-.9-2.3c-.9-.9-1.9-.9-2.4-1C16.3 4 12 4 12 4s-4.3 0-7.7.2c-.5 0-1.5.1-2.4 1C1.2 5.8 1 7.4 1 7.4S.8 9.2.8 11v1.7c0 1.8.2 3.6.2 3.6s.2 1.6.9 2.3c.9.9 2.1.9 2.7 1 1.9.2 8.2.2 8.2.2s4.3 0 7.7-.3c.5-.1 1.5-.1 2.4-1 .7-.7.9-2.3.9-2.3s.2-1.8.2-3.6V11c0-1.8-.2-3.6-.2-3.6zM9.7 14.6V8.4l5.6 3.1-5.6 3.1z"/></svg>`;
+    case 'x': return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`;
+  }
+  return '';
+}
+
+/* ===========================================================
+ * USERS
+ * =========================================================== */
+function rUsers(){
+  return `
+  <div class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center">
+    <div class="relative flex-1 max-w-md">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-fg-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="uSearch" class="input pl-9" placeholder="Search users by name, email…"/>
+    </div>
+    <div class="flex gap-1 p-1 rounded-lg bg-bg-1 border border-line text-xs">
+      <button data-uf="all" class="ufilter px-3 py-1.5 rounded-md text-fg-1 bg-bg-3">All</button>
+      <button data-uf="new" class="ufilter px-3 py-1.5 rounded-md text-fg-2 hover:text-fg-1">New (7d)</button>
+      <button data-uf="returning" class="ufilter px-3 py-1.5 rounded-md text-fg-2 hover:text-fg-1">Returning</button>
+    </div>
+    <div class="flex-1"></div>
+    <button id="uExport" class="btn btn-secondary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+  </div>
+
+  <div class="card overflow-hidden">
+    <div class="overflow-auto" style="max-height: calc(100vh - 220px)">
+      <table class="t">
+        <thead><tr>
+          <th>User</th><th>Email</th><th>Location</th><th class="text-right">Saved</th><th>Signed up</th><th>Last active</th><th>Role</th><th></th>
+        </tr></thead>
+        <tbody id="uBody"></tbody>
+      </table>
+    </div>
+    <div id="uMeta" class="px-4 py-3 text-xs text-fg-3 border-t border-line"></div>
+  </div>`;
+}
+function aUsers(){
+  let filter = 'all';
+  function getFiltered(){
+    const q = (document.getElementById('uSearch').value||'').toLowerCase().trim();
+    const today = new Date('2026-05-04');
+    return state.users.filter(u => {
+      if(filter==='new'){
+        const days = (today - new Date(u.signupAt))/(86400000);
+        if(days>7) return false;
+      }
+      if(filter==='returning'){
+        const sigDays = (today - new Date(u.signupAt))/(86400000);
+        const lastDays = (today - new Date(u.lastAt))/(86400000);
+        if(sigDays<=7 || lastDays>30) return false;
+      }
+      if(q){
+        const hay = `${u.name} ${u.email} ${u.city} ${u.country}`.toLowerCase();
+        if(!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+  function renderRows(){
+    const list = getFiltered();
+    document.getElementById('uBody').innerHTML = list.map(u => {
+      const init = u.name.split(' ').map(s=>s[0]).slice(0,2).join('');
+      const newish = (new Date('2026-05-04') - new Date(u.signupAt))/86400000 <= 7;
+      return `
+        <tr>
+          <td>
+            <div class="flex items-center gap-3">
+              <div class="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-neon-violet/40 to-neon-cyan/40 font-semibold text-sm">${escapeHtml(init)}</div>
+              <div>
+                <p class="font-medium leading-tight flex items-center gap-1.5">${escapeHtml(u.name)}${newish?' <span class="pill pill-violet">New</span>':''}${u.verified?'':' <span class="pill pill-amber">Unverified</span>'}</p>
+                <p class="text-xs text-fg-3">${escapeHtml(u.id)}</p>
+              </div>
+            </div>
+          </td>
+          <td class="text-fg-1">${escapeHtml(u.email)}</td>
+          <td class="text-fg-1">${escapeHtml(u.city)}, <span class="text-fg-3">${escapeHtml(u.country)}</span></td>
+          <td class="text-right tabular-nums">${u.saved}</td>
+          <td>${escapeHtml(u.signupAt)}</td>
+          <td>${escapeHtml(u.lastAt)}</td>
+          <td>${u.role==='Editor'?'<span class="pill pill-cyan">Editor</span>':'<span class="pill pill-muted">User</span>'}</td>
+          <td class="text-right">
+            <button class="btn-icon udel" data-id="${u.id}" data-tip="Delete user" style="color:#fb7185"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          </td>
+        </tr>`;
+    }).join('');
+    document.getElementById('uMeta').textContent = `${list.length} of ${state.users.length} users`;
+    document.querySelectorAll('.udel').forEach(b => b.addEventListener('click', () => {
+      const id = b.getAttribute('data-id');
+      const u = state.users.find(x=>x.id===id);
+      if(!u) return;
+      if(!confirm(`Delete user "${u.name}"?`)) return;
+      state.users = state.users.filter(x=>x.id!==id);
+      saveUsers(state.users);
+      renderRows();
+      toast('User deleted','✓');
+    }));
+  }
+  document.getElementById('uSearch').addEventListener('input', renderRows);
+  document.querySelectorAll('.ufilter').forEach(b => b.addEventListener('click', () => {
+    filter = b.getAttribute('data-uf');
+    document.querySelectorAll('.ufilter').forEach(x => { x.classList.remove('bg-bg-3','text-fg-1'); x.classList.add('text-fg-2'); });
+    b.classList.add('bg-bg-3','text-fg-1'); b.classList.remove('text-fg-2');
+    renderRows();
+  }));
+  document.getElementById('uExport').addEventListener('click', () => exportCSV('users.csv', toUserCSV(state.users)));
+  renderRows();
+}
+
+/* ===========================================================
+ * ANALYTICS
+ * =========================================================== */
+function rAnalytics(){
+  return `
+  <div class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center">
+    <select id="anRange" class="input max-w-[200px]">
+      <option value="7">Last 7 days</option>
+      <option value="14">Last 14 days</option>
+      <option value="30" selected>Last 30 days</option>
+      <option value="90">Last 90 days</option>
+    </select>
+    <select id="anCountry" class="input max-w-[200px]">
+      <option value="">All countries</option>
+      ${[...new Set(state.users.map(u=>u.country))].map(c=>`<option>${c}</option>`).join('')}
+    </select>
+    <div class="flex-1"></div>
+    <button class="btn btn-secondary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-4">
+    ${statCard('Visitors','24,318','+12.4%','pill-violet','▲','')}
+    ${statCard('Unique','17,941','+8.1%','pill-cyan','▲','')}
+    ${statCard('Bounce rate','38.2%','-2.1%','pill-lime','▼','')}
+    ${statCard('Avg. session','4m 12s','+0:18','pill-amber','▲','')}
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-3">
+    <div class="card p-5 lg:col-span-2">
+      <h3 class="font-semibold mb-1">Visitors over time</h3>
+      <p class="text-xs text-fg-3 mb-3">Daily unique visitors</p>
+      <div class="h-[280px] relative"><canvas id="anLine"></canvas></div>
+    </div>
+    <div class="card p-5">
+      <h3 class="font-semibold mb-1">Top countries</h3>
+      <p class="text-xs text-fg-3 mb-3">Sessions</p>
+      <div class="h-[280px] relative"><canvas id="anCountries"></canvas></div>
+    </div>
+    <div class="card p-5">
+      <h3 class="font-semibold mb-1">Sources</h3>
+      <p class="text-xs text-fg-3 mb-3">Acquisition channel</p>
+      <div class="h-[260px] relative"><canvas id="anSources"></canvas></div>
+    </div>
+    <div class="card p-5 lg:col-span-2">
+      <h3 class="font-semibold mb-1">Top pages</h3>
+      <p class="text-xs text-fg-3 mb-3">Profile views and clicks</p>
+      <div class="h-[260px] relative"><canvas id="anPages"></canvas></div>
+    </div>
+  </div>`;
+}
+function aAnalytics(){
+  destroyChart('anLine'); destroyChart('anSources'); destroyChart('anCountries'); destroyChart('anPages');
+  const select = document.getElementById('anRange');
+  const renderCharts = () => {
+    const days = +select.value;
+    const v = tsVisitors(days, 8);
+    destroyChart('anLine');
+    const ctx = document.getElementById('anLine').getContext('2d');
+    const grad = ctx.createLinearGradient(0,0,0,260);
+    grad.addColorStop(0,'rgba(157,75,255,.45)'); grad.addColorStop(1,'rgba(157,75,255,0)');
+    charts.anLine = new Chart(ctx, {
+      type:'line',
+      data:{ labels: v.map(x=>x.date.slice(5)), datasets:[
+        { label:'Visitors', data: v.map(x=>x.value), borderColor:'#9d4bff', backgroundColor:grad, fill:true, tension:.35, pointRadius:0, borderWidth:2 },
+        { label:'Last period', data: v.map(x=>Math.round(x.value*0.85)), borderColor:'#3f3f48', borderDash:[4,4], fill:false, tension:.35, pointRadius:0, borderWidth:1.4 }
+      ]},
+      options: chartOpts({yTickCallback:v=>v>=1000?(v/1000).toFixed(1)+'k':v})
+    });
+  };
+  select.addEventListener('change', renderCharts);
+  renderCharts();
+
+  // Sources
+  const ctx2 = document.getElementById('anSources').getContext('2d');
+  charts.anSources = new Chart(ctx2, {
+    type:'doughnut',
+    data:{ labels:['Direct','Social','Referral','Search'], datasets:[{ data:[42,31,19,8], backgroundColor:['#9d4bff','#22d3ee','#a3ff12','#f59e0b'], borderWidth:0, hoverOffset:8 }] },
+    options:{ plugins:{legend:{position:'bottom', labels:{color:'#cfcfd6', boxWidth:10}}, tooltip:tooltipStyle()}, cutout:'68%' }
+  });
+  // Top countries
+  const top = [['DE',1820],['UK',1520],['NL',1330],['FR',1210],['US',1180],['ES',940],['JP',880],['GE',640],['MX',590],['PL',420]];
+  const ctx3 = document.getElementById('anCountries').getContext('2d');
+  charts.anCountries = new Chart(ctx3, {
+    type:'bar',
+    data:{ labels: top.map(x=>x[0]), datasets:[{ data: top.map(x=>x[1]), backgroundColor:'#9d4bff', borderRadius:6, barPercentage:.7 }] },
+    options:{ ...chartOpts({yTickCallback:v=>v>=1000?(v/1000).toFixed(1)+'k':v}), indexAxis:'y', plugins:{legend:{display:false}, tooltip:tooltipStyle()} }
+  });
+  // Top pages
+  const tp = [...state.artists].sort((a,b)=>b.views-a.views).slice(0,8);
+  const ctx4 = document.getElementById('anPages').getContext('2d');
+  charts.anPages = new Chart(ctx4, {
+    type:'bar',
+    data:{ labels: tp.map(a=>a.name), datasets:[
+      { label:'Views', data: tp.map(a=>a.views), backgroundColor:'#9d4bff', borderRadius:6, barPercentage:.6 },
+      { label:'Clicks', data: tp.map(a=>a.clicks), backgroundColor:'#22d3ee', borderRadius:6, barPercentage:.6 }
+    ]},
+    options:{ ...chartOpts({yTickCallback:v=>v>=1000?(v/1000).toFixed(1)+'k':v}), plugins:{legend:{labels:{color:'#cfcfd6', boxWidth:10}}, tooltip:tooltipStyle()} }
+  });
+}
+
+/* ===========================================================
+ * IMPORT / EXPORT
+ * =========================================================== */
+function rImports(){
+  return `
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h3 class="font-semibold">Bulk upload artists</h3>
+          <p class="text-xs text-fg-3">CSV with header: name, slug, image, genres, city, country, email, popularity, status, …socials</p>
+        </div>
+        <button id="dlTemplate" class="btn btn-secondary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Template</button>
+      </div>
+      <div id="dz" class="dropzone mt-4">
+        <svg class="mx-auto mb-2 text-fg-3" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p class="font-medium">Drop a CSV file here</p>
+        <p class="text-xs text-fg-3 mt-1">or click to choose · max 5 MB</p>
+        <input id="dzFile" type="file" accept=".csv,text/csv" class="hidden"/>
+        <button id="dzBrowse" class="btn btn-secondary mt-4">Browse files</button>
+      </div>
+      <div id="parseResult" class="mt-4 hidden"></div>
+    </div>
+
+    <div class="card p-6">
+      <h3 class="font-semibold">Export data</h3>
+      <p class="text-xs text-fg-3 mt-1">Download the current dataset as CSV</p>
+      <div class="grid gap-3 sm:grid-cols-2 mt-5">
+        <button id="exA" class="card p-4 text-left card-hover hover:border-neon-violet/40">
+          <div class="flex items-center gap-2 mb-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M3 21a6 6 0 0 1 12 0"/></svg><span class="font-medium">artists.csv</span></div>
+          <p class="text-xs text-fg-3">${state.artists.length} rows · all fields</p>
+        </button>
+        <button id="exU" class="card p-4 text-left card-hover hover:border-neon-violet/40">
+          <div class="flex items-center gap-2 mb-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="font-medium">users.csv</span></div>
+          <p class="text-xs text-fg-3">${state.users.length} rows · all fields</p>
+        </button>
+      </div>
+      <div class="mt-6 pt-6 border-t border-line">
+        <h4 class="font-semibold text-sm">Restore demo data</h4>
+        <p class="text-xs text-fg-3 mt-1">Re-seeds artists & users from the bundled demo set. Anything you've imported is replaced.</p>
+        <button id="restoreBtn" class="btn btn-danger mt-3">Reset to demo</button>
+      </div>
+    </div>
+  </div>`;
+}
+function aImports(){
+  document.getElementById('dlTemplate').addEventListener('click', () => {
+    const csv = "name,slug,image,genres,city,country,email,popularity,verified,status,bio,rate,website,instagram,soundcloud,appleMusic,facebook,spotify,youtube,twitter\nNew Artist,new-artist,https://...,Industrial|Hard Techno,Berlin,Germany,book@example.com,50,false,draft,A short bio,€800 — €1500,,,,,,,,";
+    exportCSV('pulse-artists-template.csv', csv);
+  });
+  const dz = document.getElementById('dz');
+  const file = document.getElementById('dzFile');
+  document.getElementById('dzBrowse').addEventListener('click', () => file.click());
+  file.addEventListener('change', e => handleCSV(e.target.files[0]));
+  ['dragover','dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('over'); }));
+  ['dragleave','dragend','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('over'); }));
+  dz.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if(f) handleCSV(f); });
+  document.getElementById('exA').addEventListener('click', () => exportCSV('artists.csv', toArtistCSV(state.artists)));
+  document.getElementById('exU').addEventListener('click', () => exportCSV('users.csv', toUserCSV(state.users)));
+  document.getElementById('restoreBtn').addEventListener('click', () => {
+    if(!confirm('Reset all data to the demo seed? This cannot be undone.')) return;
+    localStorage.removeItem(LS.artists); localStorage.removeItem(LS.users);
+    state.artists = loadArtists(); state.users = loadUsers();
+    render(); toast('Reset to demo data','↩');
+  });
+}
+
+function handleCSV(f){
+  if(!f) return;
+  if(!/\.csv$/i.test(f.name) && f.type!=='text/csv'){ showParseError('Please upload a CSV file.'); return; }
+  if(f.size > 5*1024*1024){ showParseError('File too large (max 5 MB).'); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const rows = parseCSV(String(reader.result||''));
+      if(rows.length<2) throw new Error('CSV needs a header row and at least one data row.');
+      const header = rows[0].map(h=>h.trim().toLowerCase());
+      const required = ['name'];
+      for(const r of required) if(!header.includes(r)) throw new Error('Missing required column: '+r);
+      const records = rows.slice(1).filter(r=>r.length && r.some(c=>c.trim()!==''))
+        .map(r => fromCSVRow(header, r));
+      const errs = records.filter(r => r._error);
+      const ok = records.filter(r => !r._error);
+      showParsePreview(ok, errs, f.name);
+    } catch(err){
+      showParseError(err.message);
+    }
+  };
+  reader.readAsText(f);
+}
+
+function showParseError(msg){
+  const el = document.getElementById('parseResult');
+  el.classList.remove('hidden');
+  el.innerHTML = `<div class="p-3 rounded-lg border border-rose-500/30 bg-rose-500/5 text-rose-300 text-sm">⚠ ${escapeHtml(msg)}</div>`;
+}
+function showParsePreview(ok, errs, fname){
+  const el = document.getElementById('parseResult');
+  el.classList.remove('hidden');
+  el.innerHTML = `
+    <div class="rounded-lg border border-line bg-bg-1">
+      <div class="px-4 py-3 border-b border-line flex items-center justify-between">
+        <div>
+          <p class="font-medium">${escapeHtml(fname)}</p>
+          <p class="text-xs text-fg-3">${ok.length} valid · ${errs.length} with issues</p>
+        </div>
+        <div class="flex gap-2">
+          <button id="cancelImport" class="btn btn-secondary">Cancel</button>
+          <button id="applyImport" class="btn btn-primary" ${ok.length===0?'disabled style="opacity:.5"':''}>Apply ${ok.length} record(s)</button>
+        </div>
+      </div>
+      <div class="max-h-72 overflow-auto">
+        <table class="t">
+          <thead><tr><th>Status</th><th>Name</th><th>Genres</th><th>Location</th><th>Email</th></tr></thead>
+          <tbody>
+            ${[...ok.map(r=>['ok',r]), ...errs.map(r=>['err',r])].map(([s,r])=>`
+              <tr>
+                <td>${s==='ok'?'<span class="pill pill-lime">✓ OK</span>':`<span class="pill pill-rose">⚠ ${escapeHtml(r._error)}</span>`}</td>
+                <td>${escapeHtml(r.name||'—')}</td>
+                <td>${escapeHtml((r.genres||[]).join(', ')||'—')}</td>
+                <td>${escapeHtml(r.city||'—')}, ${escapeHtml(r.country||'—')}</td>
+                <td>${escapeHtml(r.email||'—')}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  document.getElementById('cancelImport').addEventListener('click', () => { el.classList.add('hidden'); el.innerHTML=''; });
+  document.getElementById('applyImport').addEventListener('click', () => {
+    const map = new Map(state.artists.map(a=>[a.slug, a]));
+    let inserted=0, updated=0;
+    for(const r of ok){
+      const slug = r.slug || slugify(r.name);
+      if(map.has(slug)){
+        const i = state.artists.findIndex(x=>x.slug===slug);
+        state.artists[i] = { ...state.artists[i], ...r, slug, social: { ...(state.artists[i].social||{}), ...(r.social||{}) } };
+        updated++;
+      } else {
+        state.artists.unshift({
+          id:'a'+Math.random().toString(36).slice(2,7),
+          createdAt: new Date().toISOString().slice(0,10),
+          views:0, clicks:0, popularity: r.popularity||50, status: r.status||'draft',
+          ...r, slug
+        });
+        inserted++;
+      }
+    }
+    saveArtists(state.artists);
+    el.classList.add('hidden'); el.innerHTML='';
+    toast(`${inserted} created, ${updated} updated`,'✓');
+  });
+}
+
+/* ===== CSV helpers ===== */
+function parseCSV(text){
+  const rows=[]; let i=0, field='', row=[], inQ=false;
+  while(i<text.length){
+    const c=text[i];
+    if(inQ){
+      if(c==='"' && text[i+1]==='"'){ field+='"'; i+=2; continue; }
+      if(c==='"'){ inQ=false; i++; continue; }
+      field+=c; i++; continue;
+    } else {
+      if(c==='"'){ inQ=true; i++; continue; }
+      if(c===','){ row.push(field); field=''; i++; continue; }
+      if(c==='\r'){ i++; continue; }
+      if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; i++; continue; }
+      field+=c; i++;
+    }
+  }
+  if(field.length>0 || row.length>0){ row.push(field); rows.push(row); }
+  return rows;
+}
+function csvEscape(v){
+  v = v==null ? '' : String(v);
+  if(/[",\n\r]/.test(v)) return '"'+v.replace(/"/g,'""')+'"';
+  return v;
+}
+function fromCSVRow(header, cells){
+  const o={};
+  header.forEach((h,i) => o[h] = (cells[i]||'').trim());
+  const out = {
+    name: o.name || '',
+    slug: o.slug || '',
+    profileImage: o.image || o.profileimage || '',
+    genres: (o.genres || o.genre || '').split(/\||,|;/).map(s=>s.trim()).filter(Boolean),
+    city: o.city || '',
+    country: o.country || '',
+    email: o.email || '',
+    popularity: Math.min(100, Math.max(0, +o.popularity || 50)),
+    verified: /^(true|yes|1)$/i.test(o.verified||''),
+    status: ['active','draft'].includes(o.status) ? o.status : 'draft',
+    bio: o.bio || '',
+    rate: o.rate || '',
+    social: {
+      website: o.website || '', instagram: o.instagram || '', soundcloud: o.soundcloud || '',
+      appleMusic: o['applemusic'] || o['apple_music'] || '', facebook: o.facebook || '',
+      spotify: o.spotify || '', youtube: o.youtube || '', twitter: o.twitter || ''
+    }
+  };
+  if(!out.name) out._error = 'name required';
+  if(out.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(out.email)) out._error = 'invalid email';
+  return out;
+}
+function toArtistCSV(arr){
+  const head = ['id','name','slug','image','genres','city','country','email','popularity','verified','status','views','clicks','rate','website','instagram','soundcloud','appleMusic','facebook','spotify','youtube','twitter'];
+  const lines = [head.join(',')];
+  for(const a of arr){
+    lines.push([
+      a.id, a.name, a.slug, a.profileImage, (a.genres||[]).join('|'), a.city, a.country, a.email,
+      a.popularity, a.verified?'true':'false', a.status, a.views, a.clicks, a.rate||'',
+      a.social?.website||'', a.social?.instagram||'', a.social?.soundcloud||'', a.social?.appleMusic||'',
+      a.social?.facebook||'', a.social?.spotify||'', a.social?.youtube||'', a.social?.twitter||''
+    ].map(csvEscape).join(','));
+  }
+  return lines.join('\n');
+}
+function toUserCSV(arr){
+  const head = ['id','name','email','city','country','signupAt','lastAt','verified','saved','role'];
+  const lines = [head.join(',')];
+  for(const u of arr){
+    lines.push([u.id,u.name,u.email,u.city,u.country,u.signupAt,u.lastAt,u.verified?'true':'false',u.saved,u.role].map(csvEscape).join(','));
+  }
+  return lines.join('\n');
+}
+function exportCSV(filename, csv){
+  const blob = new Blob(["﻿"+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast(`Exported ${filename}`,'⤓');
+}
+
+/* ===========================================================
+ * LIVE ACTIVITY
+ * =========================================================== */
+function rActivity(){
+  return `
+  <div class="grid gap-4 lg:grid-cols-3">
+    <div class="card p-5 lg:col-span-2">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h3 class="font-semibold">Live activity feed</h3>
+          <p class="text-xs text-fg-3">Real-time events</p>
+        </div>
+        <span class="pill pill-lime"><span class="live-dot"></span>Streaming</span>
+      </div>
+      <ul id="liveFeed" class="space-y-2.5 text-sm"></ul>
+    </div>
+    <div class="card p-5">
+      <h3 class="font-semibold mb-1">Online now</h3>
+      <p class="text-xs text-fg-3 mb-3">Visitors active in the last 5 min</p>
+      <div class="flex items-end gap-1 h-32">
+        ${[...Array(24)].map((_,i)=>`<div class="flex-1 rounded-sm bg-gradient-to-t from-neon-violet to-neon-cyan" style="height:${Math.max(8,Math.sin(i/2)*40+50)}%;opacity:.${4+i%5}"></div>`).join('')}
+      </div>
+      <p class="mt-4 text-xs text-fg-3">Berlin · 8 · London · 6 · Paris · 5 · NYC · 4 · Tokyo · 3</p>
+      <div class="mt-4 pt-4 border-t border-line text-xs text-fg-2 grid grid-cols-2 gap-y-1">
+        <span>Sessions today</span><span class="text-right text-fg-1 font-medium">1,847</span>
+        <span>Avg. duration</span><span class="text-right text-fg-1 font-medium">4m 12s</span>
+        <span>Pages / session</span><span class="text-right text-fg-1 font-medium">3.4</span>
+        <span>Bounce rate</span><span class="text-right text-fg-1 font-medium">38.2%</span>
+      </div>
+    </div>
+  </div>`;
+}
+function aActivity(){
+  const feed = document.getElementById('liveFeed');
+  const events = [
+    e=>`<span class="font-medium">${pickName()}</span> <span class="text-fg-2">viewed</span> <span class="font-medium">${pickArtist()}</span>`,
+    e=>`<span class="font-medium">${pickEmail()}</span> <span class="text-fg-2">signed up</span>`,
+    e=>`<span class="font-medium">${pickName()}</span> <span class="text-fg-2">contacted</span> <span class="font-medium">${pickArtist()}</span>`,
+    e=>`<span class="font-medium">${pickName()}</span> <span class="text-fg-2">saved</span> <span class="font-medium">${pickArtist()}</span>`
+  ];
+  function pickArtist(){ return state.artists[Math.floor(Math.random()*state.artists.length)].name; }
+  function pickName(){ return state.users[Math.floor(Math.random()*state.users.length)].name; }
+  function pickEmail(){ return state.users[Math.floor(Math.random()*state.users.length)].email; }
+  function add(){
+    const html = events[Math.floor(Math.random()*events.length)]();
+    const li = document.createElement('li');
+    li.className = 'flex items-start gap-3';
+    li.innerHTML = `<span class="grid place-items-center h-7 w-7 rounded-lg bg-neon-violet/15 text-sm">●</span><div class="flex-1"><p class="leading-tight">${html}</p><p class="text-xs text-fg-3">just now</p></div>`;
+    li.style.opacity = '0';
+    feed.prepend(li);
+    requestAnimationFrame(() => { li.style.transition='opacity .5s'; li.style.opacity='1'; });
+    while(feed.children.length>20) feed.removeChild(feed.lastChild);
+  }
+  for(let i=0;i<8;i++) add();
+  if(aActivity._t) clearInterval(aActivity._t);
+  aActivity._t = setInterval(add, 3500);
+}
+
+/* ===========================================================
+ * SUBSCRIPTIONS
+ * =========================================================== */
+function rSubs(){
+  const subs = state.subs;
+  const totalArtistsOnSubs = state.artists.filter(a => a.subTierId).length;
+  const mrr = subs.filter(s=>s.status==='active').reduce((sum,s) => {
+    const count = state.artists.filter(a => a.subTierId === s.id).length;
+    return sum + (s.period === 'year' ? (s.price/12) : s.price) * count;
+  }, 0);
+  return `
+  <div class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center">
+    <div>
+      <p class="text-sm text-fg-2">Set the annual subscription tiers artists can choose when they sign up. Pricing and features sync to the public signup flow.</p>
+    </div>
+    <div class="flex-1"></div>
+    <button id="addTier" class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add tier</button>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-3 mb-6">
+    ${statCard('Active tiers', String(subs.filter(s=>s.status==='active').length), '+0 this month', 'pill-violet','▲','')}
+    ${statCard('Subscribed artists', String(totalArtistsOnSubs), '+0 this month', 'pill-cyan','▲','')}
+    ${statCard('Est. monthly recurring', '€'+Math.round(mrr).toLocaleString(), 'from active subs', 'pill-lime','▲','')}
+  </div>
+
+  <div id="subsGrid" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    ${subs.map(subCard).join('')}
+  </div>`;
+}
+function subCard(s){
+  const featured = s.isDefault;
+  const subscribers = state.artists.filter(a => a.subTierId === s.id).length;
+  return `
+  <div class="card p-6 relative overflow-hidden ${featured?'ring-1 ring-neon-violet/40':''}" data-id="${s.id}">
+    ${featured?'<span class="absolute right-4 top-4 pill pill-violet">Default</span>':''}
+    <div class="flex items-center gap-2">
+      <span class="grid h-9 w-9 place-items-center rounded-xl bg-bg-2 text-neon-cyan"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+      <h3 class="font-semibold">${escapeHtml(s.name)}</h3>
+      ${s.status==='active'?'<span class="pill pill-lime">Active</span>':'<span class="pill pill-amber">Draft</span>'}
+    </div>
+    <p class="mt-4 text-3xl font-bold tracking-tight">${s.originalPrice?`<span class="text-xl text-fg-3 line-through mr-2 font-medium">${currencySymbol(s.currency)}${s.originalPrice.toLocaleString()}</span>`:''}${currencySymbol(s.currency)}${s.price.toLocaleString()}<span class="text-sm font-medium text-fg-3"> / ${s.period}</span></p>
+    ${s.freeQuota?`<p class="text-xs text-neon-lime mt-1">First ${s.freeQuota} ${s.period==='inquiry'?'inquir'+(s.freeQuota>1?'ies':'y'):''} free</p>`:''}
+    <ul class="mt-4 space-y-1.5 text-sm text-fg-1">
+      ${(s.features||[]).map(f=>`<li class="flex gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a3ff12" stroke-width="2.5" class="flex-shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>${escapeHtml(f)}</li>`).join('')}
+    </ul>
+    <div class="mt-5 pt-5 border-t border-line flex items-center gap-2">
+      <span class="text-xs text-fg-3 flex-1">${subscribers} subscriber${subscribers===1?'':'s'}</span>
+      <button class="btn-icon edit-tier" data-id="${s.id}" data-tip="Edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+      <button class="btn-icon del-tier" data-id="${s.id}" data-tip="Delete" style="color:#fb7185"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+    </div>
+  </div>`;
+}
+function currencySymbol(c){return ({EUR:'€',USD:'$',GBP:'£',JPY:'¥'})[c]||'';}
+function aSubs(){
+  document.getElementById('addTier').addEventListener('click', () => editTier(null));
+  document.querySelectorAll('.edit-tier').forEach(b => b.addEventListener('click', () => editTier(b.getAttribute('data-id'))));
+  document.querySelectorAll('.del-tier').forEach(b => b.addEventListener('click', () => deleteTier(b.getAttribute('data-id'))));
+}
+function editTier(id){
+  const isNew = !id;
+  const s = isNew
+    ? { id:'sub_'+Math.random().toString(36).slice(2,7), name:'', price:99, currency:'EUR', period:'year', features:[], status:'active', isDefault:false }
+    : { ...state.subs.find(x=>x.id===id) };
+  const body = `
+  <form id="tierForm" class="space-y-5">
+    <div class="grid grid-cols-2 gap-3">
+      <div class="col-span-2"><label class="label">Tier name</label><input class="input" id="tfName" required value="${escapeHtml(s.name)}" placeholder="e.g. Pro Annual"/></div>
+      <div><label class="label">Price</label><input class="input" id="tfPrice" type="number" step="0.01" min="0" value="${s.price}"/></div>
+      <div><label class="label">Original price (strikethrough)</label><input class="input" id="tfOrig" type="number" step="0.01" min="0" value="${s.originalPrice||''}" placeholder="e.g. 199"/></div>
+      <div><label class="label">Currency</label>
+        <select class="input" id="tfCur">
+          ${['EUR','USD','GBP','JPY'].map(c=>`<option value="${c}" ${s.currency===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div><label class="label">Billing period</label>
+        <select class="input" id="tfPeriod">
+          <option value="year" ${s.period==='year'?'selected':''}>Annual</option>
+          <option value="month" ${s.period==='month'?'selected':''}>Monthly</option>
+          <option value="inquiry" ${s.period==='inquiry'?'selected':''}>Per inquiry (pay-as-you-go)</option>
+        </select>
+      </div>
+      <div><label class="label">Free quota</label><input class="input" id="tfQuota" type="number" min="0" value="${s.freeQuota||0}" placeholder="e.g. 1 free inquiry"/></div>
+      <div><label class="label">Status</label>
+        <select class="input" id="tfStatus">
+          <option value="active" ${s.status==='active'?'selected':''}>Active</option>
+          <option value="draft" ${s.status==='draft'?'selected':''}>Draft</option>
+        </select>
+      </div>
+      <div class="col-span-2 flex items-center gap-2 pt-1"><input type="checkbox" id="tfDefault" ${s.isDefault?'checked':''} class="accent-neon-violet"/><label for="tfDefault" class="text-sm text-fg-1">Highlight as default tier on the public signup</label></div>
+    </div>
+    <div>
+      <label class="label">Features (one per line)</label>
+      <textarea class="input" id="tfFeatures" rows="6" placeholder="Public profile&#10;Bookings inbox&#10;…">${escapeHtml((s.features||[]).join('\n'))}</textarea>
+    </div>
+    <div class="flex items-center justify-between gap-3 pt-3 border-t border-line">
+      <div>${!isNew?`<button type="button" id="tfDelete" class="btn btn-danger">Delete tier</button>`:''}</div>
+      <div class="flex gap-2">
+        <button type="button" id="tfCancel" class="btn btn-secondary">Cancel</button>
+        <button type="submit" class="btn btn-primary">${isNew?'Create tier':'Save changes'}</button>
+      </div>
+    </div>
+  </form>`;
+  openDrawer(isNew?'New subscription tier':`Edit ${s.name}`, body);
+  document.getElementById('tfCancel').addEventListener('click', closeDrawer);
+  const delBtn = document.getElementById('tfDelete');
+  if(delBtn) delBtn.addEventListener('click', () => deleteTier(id));
+  document.getElementById('tierForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const next = {
+      ...s,
+      name: document.getElementById('tfName').value.trim(),
+      price: +document.getElementById('tfPrice').value || 0,
+      originalPrice: +document.getElementById('tfOrig').value || undefined,
+      freeQuota: +document.getElementById('tfQuota').value || 0,
+      currency: document.getElementById('tfCur').value,
+      period: document.getElementById('tfPeriod').value,
+      status: document.getElementById('tfStatus').value,
+      isDefault: document.getElementById('tfDefault').checked,
+      features: document.getElementById('tfFeatures').value.split('\n').map(x=>x.trim()).filter(Boolean)
+    };
+    if(next.isDefault){
+      // only one default
+      state.subs.forEach(x => x.isDefault = false);
+    }
+    if(isNew) state.subs.push(next);
+    else {
+      const i = state.subs.findIndex(x=>x.id===id);
+      state.subs[i] = next;
+    }
+    saveSubs(state.subs);
+    closeDrawer(); render(); toast(isNew?'Tier created':'Tier updated','✓');
+  });
+}
+function deleteTier(id){
+  const s = state.subs.find(x=>x.id===id);
+  if(!s) return;
+  const subs = state.artists.filter(a=>a.subTierId===id).length;
+  if(subs>0 && !confirm(`This tier has ${subs} subscriber(s). Delete anyway?`)) return;
+  if(subs===0 && !confirm(`Delete "${s.name}"?`)) return;
+  state.subs = state.subs.filter(x=>x.id!==id);
+  saveSubs(state.subs);
+  closeDrawer(); render(); toast('Tier deleted','✓');
+}
+
+/* ===========================================================
+ * CLIENTS & PARTNERS (the "Loved by" marquee on the public site)
+ * =========================================================== */
+function rClients(){
+  const cs = state.clients;
+  return `
+  <div class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center">
+    <div>
+      <p class="text-sm text-fg-2">Venues, promoters, and labels that use PULSE — shown in the homepage marquee. Upload a logo (PNG/SVG/JPG, transparent background works best) or leave it as text.</p>
+    </div>
+    <div class="flex-1"></div>
+    <button id="addClient" class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add client</button>
+  </div>
+
+  <div class="card overflow-hidden">
+    <table class="t">
+      <thead><tr><th>Logo</th><th>Name</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        ${cs.map(c => `
+          <tr data-id="${c.id}">
+            <td>
+              <div class="h-10 w-32 rounded-lg bg-bg-2 grid place-items-center overflow-hidden border border-line">
+                ${c.logo
+                  ? `<img src="${c.logo}" alt="${escapeHtml(c.name)}" class="max-h-full max-w-full object-contain"/>`
+                  : `<span class="text-fg-3 text-xs">no logo</span>`}
+              </div>
+            </td>
+            <td><p class="font-medium">${escapeHtml(c.name)}</p></td>
+            <td>${c.status==='active'?'<span class="pill pill-lime">● Active</span>':'<span class="pill pill-amber">● Hidden</span>'}</td>
+            <td class="text-right">
+              <button class="btn-icon edit-client" data-id="${c.id}" data-tip="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="btn-icon del-client" data-id="${c.id}" data-tip="Delete" style="color:#fb7185"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="px-4 py-3 text-xs text-fg-3 border-t border-line">${cs.length} client${cs.length===1?'':'s'} · auto-syncs to homepage on save</div>
+  </div>`;
+}
+function aClients(){
+  document.getElementById('addClient').addEventListener('click', () => editClient(null));
+  document.querySelectorAll('.edit-client').forEach(b => b.addEventListener('click', () => editClient(b.getAttribute('data-id'))));
+  document.querySelectorAll('.del-client').forEach(b => b.addEventListener('click', () => {
+    const id = b.getAttribute('data-id');
+    const c = state.clients.find(x => x.id === id);
+    if(!c || !confirm(`Delete "${c.name}"?`)) return;
+    state.clients = state.clients.filter(x => x.id !== id);
+    saveClients(state.clients); render(); toast('Client deleted','✓');
+  }));
+}
+function editClient(id){
+  const isNew = !id;
+  const c = isNew ? { id:'cl_'+Math.random().toString(36).slice(2,7), name:'', logo:'', status:'active' } : { ...state.clients.find(x=>x.id===id) };
+  const body = `
+  <form id="clientForm" class="space-y-5">
+    <div>
+      <label class="label">Logo</label>
+      <label id="cliDrop" class="block cursor-pointer rounded-xl border-2 border-dashed border-line bg-bg-1 hover:border-bg-3 transition-colors overflow-hidden">
+        <div class="h-32 grid place-items-center px-4 relative">
+          <img id="cliImg" src="${c.logo||''}" alt="" class="max-h-full max-w-full object-contain ${c.logo?'':'hidden'}"/>
+          <div id="cliPh" class="text-fg-3 text-xs text-center ${c.logo?'hidden':''}">
+            <svg class="mx-auto mb-2" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p class="text-fg-1 font-medium">Click or drag to upload</p>
+            <p class="text-fg-3">PNG / SVG / JPG · 1 MB max · transparent works best</p>
+          </div>
+        </div>
+        <input type="file" id="cliFile" accept="image/png,image/svg+xml,image/jpeg,image/webp" class="hidden"/>
+      </label>
+      <div class="mt-2 flex items-center gap-2 text-xs">
+        <button type="button" id="cliRemove" class="text-fg-3 hover:text-fg-1 underline-offset-4 hover:underline ${c.logo?'':'hidden'}">Remove logo</button>
+        <span class="flex-1"></span>
+      </div>
+    </div>
+    <div>
+      <label class="label">Name <span class="text-fg-3 normal-case">(used as alt text and as fallback if no logo)</span></label>
+      <input class="input" id="cliName" required value="${escapeHtml(c.name)}" placeholder="e.g. Tresor"/>
+    </div>
+    <div>
+      <label class="label">Status</label>
+      <select class="input" id="cliStatus">
+        <option value="active" ${c.status==='active'?'selected':''}>Active — show on homepage</option>
+        <option value="draft" ${c.status==='draft'?'selected':''}>Hidden — keep in admin only</option>
+      </select>
+    </div>
+    <div class="flex items-center justify-between gap-3 pt-3 border-t border-line">
+      <div>${!isNew?`<button type="button" id="cliDelete" class="btn btn-danger">Delete</button>`:''}</div>
+      <div class="flex gap-2">
+        <button type="button" id="cliCancel" class="btn btn-secondary">Cancel</button>
+        <button type="submit" class="btn btn-primary">${isNew?'Add client':'Save'}</button>
+      </div>
+    </div>
+  </form>`;
+  openDrawer(isNew?'Add client':`Edit ${c.name}`, body);
+  document.getElementById('cliCancel').addEventListener('click', closeDrawer);
+  const delBtn = document.getElementById('cliDelete');
+  if(delBtn) delBtn.addEventListener('click', () => {
+    if(!confirm(`Delete "${c.name}"?`)) return;
+    state.clients = state.clients.filter(x => x.id !== id);
+    saveClients(state.clients); closeDrawer(); render(); toast('Client deleted','✓');
+  });
+  // file upload
+  const drop = document.getElementById('cliDrop'), file = document.getElementById('cliFile'), img = document.getElementById('cliImg'), ph = document.getElementById('cliPh'), rm = document.getElementById('cliRemove');
+  let dataUrl = c.logo || '';
+  function setLogo(url){ dataUrl = url; if(url){ img.src=url; img.classList.remove('hidden'); ph.classList.add('hidden'); rm.classList.remove('hidden'); } else { img.removeAttribute('src'); img.classList.add('hidden'); ph.classList.remove('hidden'); rm.classList.add('hidden'); } }
+  function readFile(f){
+    if(!f) return;
+    if(!f.type.startsWith('image/')) return alert('Please choose an image file.');
+    if(f.size > 1024*1024) return alert('Logo too large — keep it under 1 MB.');
+    const r = new FileReader();
+    r.onload = () => setLogo(r.result);
+    r.readAsDataURL(f);
+  }
+  file.addEventListener('change', e => readFile(e.target.files && e.target.files[0]));
+  ['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('border-neon-violet/50'); }));
+  ['dragleave','dragend','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('border-neon-violet/50'); }));
+  drop.addEventListener('drop', e => { const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if(f) readFile(f); });
+  rm.addEventListener('click', () => { setLogo(''); file.value=''; });
+
+  document.getElementById('clientForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const next = { ...c, name: document.getElementById('cliName').value.trim(), status: document.getElementById('cliStatus').value, logo: dataUrl };
+    if(!next.name) return alert('Name is required.');
+    if(isNew) state.clients.push(next);
+    else { const i = state.clients.findIndex(x=>x.id===id); state.clients[i] = next; }
+    saveClients(state.clients); closeDrawer(); render(); toast(isNew?'Client added':'Client updated','✓');
+  });
+}
+
+/* ===========================================================
+ * APPLICATIONS (artist self-signups awaiting review)
+ * =========================================================== */
+function rApps(){
+  const pending = state.artists.filter(a => a.status === 'pending');
+  return `
+  <div class="mb-4">
+    <p class="text-sm text-fg-2">Artists who signed up via the public site and chose a paid tier. Approve to publish their profile, or reject to remove.</p>
+  </div>
+  ${pending.length === 0
+    ? `<div class="card p-12 text-center"><div class="text-3xl mb-3">📭</div><p class="font-semibold">No pending applications</p><p class="text-sm text-fg-3 mt-1">When an artist signs up via the public site, they'll appear here for review.</p></div>`
+    : `<div class="card overflow-hidden">
+        <table class="t">
+          <thead><tr><th>Artist</th><th>Genres</th><th>Location</th><th>Subscription</th><th>Applied</th><th></th></tr></thead>
+          <tbody>
+            ${pending.map(a => {
+              const sub = state.subs.find(s => s.id === a.subTierId);
+              return `<tr data-id="${a.id}">
+                <td>
+                  <div class="flex items-center gap-3">
+                    ${a.profileImage ? `<img src="${a.profileImage}" class="h-9 w-9 rounded-lg object-cover" alt=""/>` : `<div class="h-9 w-9 rounded-lg bg-bg-3 grid place-items-center text-fg-3 text-xs">—</div>`}
+                    <div>
+                      <p class="font-medium leading-tight">${escapeHtml(a.name)}</p>
+                      <p class="text-xs text-fg-3">${escapeHtml(a.email||'')}</p>
+                    </div>
+                  </div>
+                </td>
+                <td><div class="flex flex-wrap gap-1">${(a.genres||[]).map(g=>`<span class="pill pill-muted">${escapeHtml(g)}</span>`).join('')||'<span class="text-fg-3 text-xs">—</span>'}</div></td>
+                <td class="text-fg-1">${escapeHtml(a.city||'')}, <span class="text-fg-3">${escapeHtml(a.country||'')}</span></td>
+                <td>${sub ? `<span class="pill pill-violet">${escapeHtml(sub.name)} · ${currencySymbol(sub.currency)}${sub.price}/${sub.period}</span>` : '<span class="text-fg-3 text-xs">—</span>'}</td>
+                <td class="text-fg-2">${escapeHtml(a.createdAt||'')}</td>
+                <td class="text-right">
+                  <button class="btn btn-primary approve-app" data-id="${a.id}" style="padding:.4rem .9rem;font-size:.78rem">Approve</button>
+                  <button class="btn btn-danger reject-app" data-id="${a.id}" style="padding:.4rem .9rem;font-size:.78rem">Reject</button>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`}`;
+}
+function aApps(){
+  document.querySelectorAll('.approve-app').forEach(b => b.addEventListener('click', () => {
+    const id = b.getAttribute('data-id');
+    const i = state.artists.findIndex(a => a.id === id);
+    if(i < 0) return;
+    state.artists[i] = { ...state.artists[i], status: 'active' };
+    saveArtists(state.artists);
+    render();
+    toast(`Approved ${state.artists[i].name}`,'✓');
+  }));
+  document.querySelectorAll('.reject-app').forEach(b => b.addEventListener('click', () => {
+    const id = b.getAttribute('data-id');
+    const a = state.artists.find(x => x.id === id);
+    if(!a) return;
+    if(!confirm(`Reject "${a.name}"? This removes their application.`)) return;
+    state.artists = state.artists.filter(x => x.id !== id);
+    saveArtists(state.artists);
+    render();
+    toast('Application rejected','↩');
+  }));
+}
+
+/* ===========================================================
+ * SETTINGS
+ * =========================================================== */
+function rSettings(){
+  return `
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="card p-6">
+      <h3 class="font-semibold">Account</h3>
+      <div class="mt-4 space-y-3">
+        <div><label class="label">Admin email</label><input class="input" id="setEmail" value="${escapeHtml(localStorage.getItem(LS.auth+':email')||'admin@pulse.io')}"/></div>
+        <div><label class="label">Display name</label><input class="input" value="Admin" placeholder="Your name"/></div>
+        <div><label class="label">Role</label><select class="input"><option>Super admin</option><option>Editor</option></select></div>
+        <button class="btn btn-primary mt-2">Save changes</button>
+      </div>
+    </div>
+    <div class="card p-6">
+      <h3 class="font-semibold">Branding</h3>
+      <div class="mt-4 space-y-3">
+        <div><label class="label">Site name</label><input class="input" value="PULSE"/></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="label">Primary colour</label><div class="flex gap-2"><span class="h-10 w-10 rounded-lg" style="background:#9d4bff"></span><input class="input flex-1" value="#9d4bff"/></div></div>
+          <div><label class="label">Accent colour</label><div class="flex gap-2"><span class="h-10 w-10 rounded-lg" style="background:#22d3ee"></span><input class="input flex-1" value="#22d3ee"/></div></div>
+        </div>
+        <button class="btn btn-secondary mt-2">Update branding</button>
+      </div>
+    </div>
+    <div class="card p-6 lg:col-span-2">
+      <h3 class="font-semibold">Danger zone</h3>
+      <p class="text-xs text-fg-3 mt-1">Irreversible actions</p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button class="btn btn-danger" onclick="if(confirm('Sign out everywhere?')){toast('Sessions revoked','↩')}">Revoke all sessions</button>
+        <button class="btn btn-danger" onclick="if(confirm('Reset all admin data?')){localStorage.clear();location.reload()}">Reset admin data</button>
+      </div>
+    </div>
+  </div>`;
+}
+function aSettings(){}
+
+/* ===========================================================
+ * Boot
+ * =========================================================== */
+applyAuth();
+if(!isAuthed()){
+  // first-time: stay on login screen
+} else {
+  if(!location.hash) location.hash = '#overview';
+  render();
+}
+</script>
+</body>
+</html>
